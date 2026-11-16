@@ -150,10 +150,49 @@
 
         if (typeof L !== "undefined" && mapContainer) {
             map = L.map("centers-map").setView([11.8, 122.8], 6);
-            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                maxZoom: 19,
-                attribution: "&copy; OpenStreetMap contributors",
-            }).addTo(map);
+
+            const cartoVoyager = L.tileLayer(
+                "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+                {
+                    maxZoom: 19,
+                    subdomains: "abcd",
+                    attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+                }
+            );
+            const osmHot = L.tileLayer(
+                "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+                {
+                    maxZoom: 19,
+                    attribution: "&copy; OpenStreetMap contributors, Tiles style by Humanitarian OpenStreetMap Team",
+                }
+            );
+            const osmStandard = L.tileLayer(
+                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+                    maxZoom: 19,
+                    attribution: "&copy; OpenStreetMap contributors",
+                }
+            );
+
+            let fallbackTriggered = false;
+            cartoVoyager.on("tileerror", function () {
+                if (!fallbackTriggered && map.hasLayer(cartoVoyager)) {
+                    fallbackTriggered = true;
+                    map.removeLayer(cartoVoyager);
+                    osmHot.addTo(map);
+                }
+            });
+
+            cartoVoyager.addTo(map);
+            L.control.layers(
+                {
+                    "OpenStreetMap (Voyager)": cartoVoyager,
+                    "OpenStreetMap (Humanitarian / HOT)": osmHot,
+                    "OpenStreetMap (Standard)": osmStandard,
+                },
+                null,
+                { position: "topright" }
+            ).addTo(map);
 
             centers.forEach(function (c) {
                 const marker = L.marker([c.lat, c.lng]).addTo(map);

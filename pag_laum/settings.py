@@ -127,3 +127,7 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+
+# Security / Referrer policy (allows OpenStreetMap tile servers to receive origin referrer)
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
