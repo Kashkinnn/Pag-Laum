@@ -1,5 +1,22 @@
+import os
 from pathlib import Path
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def _load_env_file(env_path: Path) -> None:
+    """Load key=value pairs from a local .env file without overriding existing env vars."""
+    if not env_path.exists():
+        return
+    for raw_line in env_path.read_text(encoding='utf-8').splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+        key, value = line.split('=', 1)
+        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+
+_load_env_file(BASE_DIR / '.env')
 
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
@@ -61,12 +78,25 @@ WSGI_APPLICATION = 'pag_laum.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if os.environ.get('SUPABASE_DB_PASSWORD'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('SUPABASE_DB_NAME', 'postgres'),
+            'USER': os.environ.get('SUPABASE_DB_USER', 'postgres'),
+            'PASSWORD': os.environ['SUPABASE_DB_PASSWORD'],
+            'HOST': os.environ.get('SUPABASE_DB_HOST', 'db.fcouztcbiaehhdyuwyie.supabase.co'),
+            'PORT': os.environ.get('SUPABASE_DB_PORT', '5432'),
+            'OPTIONS': {'sslmode': 'require'},
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation (Works but i need commented this out due to some adjustments)
@@ -131,3 +161,12 @@ MAILERS = {
 
 # Security / Referrer policy (allows OpenStreetMap tile servers to receive origin referrer)
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
+
+# Supabase REST & Project Configuration
+SUPABASE_URL = os.environ.get(
+    'SUPABASE_URL',
+    'https://fcouztcbiaehhdyuwyie.supabase.co',
+).rstrip('/')
+SUPABASE_ANON_KEY = os.environ.get('SUPABASE_ANON_KEY', '').strip()
+SUPABASE_PROJECT_REF = 'fcouztcbiaehhdyuwyie'

@@ -1,0 +1,17 @@
+# Environment & secrets (never commit credentials)
+.env
+.env.*
+!.env.example
+
+# Virtual environments & bytecode
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Local baseline & evidence files
+BASELINE_COMMIT.txt
+GIT_*.txt
+GIT_*.patch
+APPLICATION_SCREENSHOTS/
+GITHUB_SCREENSHOTS/
