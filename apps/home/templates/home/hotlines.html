@@ -1,0 +1,133 @@
+{% extends "home/home.html" %}
+
+{% block title %}Crisis Hotlines - Pag-Laum{% endblock %}
+
+{% block main_content %}
+<section class="page-banner">
+    <div>
+        <h1>24/7 Crisis Hotline Directory</h1>
+        <p>
+            You do not have to carry this alone. Free, confidential support is one call away.
+            Tap any number below to dial immediately or copy it for later.
+        </p>
+    </div>
+    <div class="static-disclaimer">
+        Curated static directory &bull; Standard carrier rates may apply for non-toll-free mobile numbers
+    </div>
+</section>
+
+<section class="filter-toolbar" aria-label="Filter crisis hotlines">
+    <div class="filter-pills" role="group" aria-label="Filter by region">
+        {% for region in regions %}
+        <button
+            type="button"
+            class="filter-pill {% if selected_region == region %}active{% endif %}"
+            data-region="{{ region }}"
+        >
+            {{ region }}
+        </button>
+        {% endfor %}
+    </div>
+
+    <input
+        type="search"
+        id="hotline-search"
+        class="search-input-box"
+        placeholder="Search hotline name, region, or number..."
+        value="{{ search_query }}"
+        aria-label="Search crisis hotlines"
+    >
+</section>
+
+<section class="hotlines-grid" id="hotlines-grid">
+    {% for hotline in hotlines %}
+    <article
+        class="hotline-card {% if hotline.region == 'Emergency' %}is-emergency{% endif %}"
+        data-region="{{ hotline.region }}"
+        data-search="{{ hotline.name|lower }} {{ hotline.region|lower }} {{ hotline.category|lower }} {{ hotline.description|lower }}"
+    >
+        <div class="hotline-meta">
+            <span class="badge-region">{{ hotline.region }}</span>
+            <span class="badge-hours">{{ hotline.availability }}</span>
+        </div>
+
+        <div>
+            <h2>{{ hotline.name }}</h2>
+            <p class="hotline-desc">{{ hotline.description }}</p>
+        </div>
+
+        <div class="number-list">
+            {% for num in hotline.numbers %}
+            <div class="number-row">
+                <div class="number-info">
+                    <strong>{{ num.phone }}</strong>
+                    <span>{{ num.label }}</span>
+                </div>
+                <div class="number-actions">
+                    <a href="tel:{{ num.dial }}" class="call-btn">Call</a>
+                    <button
+                        type="button"
+                        class="copy-btn"
+                        data-copy="{{ num.phone }}"
+                        aria-label="Copy {{ num.phone }}"
+                    >
+                        Copy
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </article>
+    {% empty %}
+    <p>No crisis hotlines matched your filter.</p>
+    {% endfor %}
+</section>
+{% endblock %}
+
+{% block home_extra_scripts %}
+<script>
+    (function () {
+        const filterButtons = document.querySelectorAll(".filter-pill");
+        const searchInput = document.getElementById("hotline-search");
+        const cards = document.querySelectorAll("#hotlines-grid .hotline-card");
+        let activeRegion = "{{ selected_region|escapejs }}";
+
+        function applyFilters() {
+            const query = (searchInput ? searchInput.value : "").trim().toLowerCase();
+            cards.forEach(function (card) {
+                const region = card.getAttribute("data-region");
+                const searchable = (card.getAttribute("data-search") || "") + " " + card.textContent.toLowerCase();
+                const matchesRegion = activeRegion === "All Regions" || region === activeRegion;
+                const matchesQuery = !query || searchable.includes(query);
+                card.style.display = matchesRegion && matchesQuery ? "flex" : "none";
+            });
+        }
+
+        filterButtons.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                filterButtons.forEach(function (b) { b.classList.remove("active"); });
+                btn.classList.add("active");
+                activeRegion = btn.getAttribute("data-region");
+                applyFilters();
+            });
+        });
+
+        if (searchInput) {
+            searchInput.addEventListener("input", applyFilters);
+        }
+
+        document.querySelectorAll(".copy-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                const value = btn.getAttribute("data-copy");
+                if (navigator.clipboard && value) {
+                    navigator.clipboard.writeText(value).then(function () {
+                        const original = btn.textContent;
+                        btn.textContent = "Copied!";
+                        setTimeout(function () { btn.textContent = original; }, 1400);
+                    });
+                }
+            });
+        });
+    })();
+</script>
+{% endblock %}

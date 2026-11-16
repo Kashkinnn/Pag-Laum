@@ -1,6 +1,7 @@
 from functools import wraps
 
 from django.shortcuts import redirect, render
+from django.urls import reverse
 
 from .data import CRISIS_HOTLINES, EPISODE_GUIDES, PSYCHIATRIC_CENTERS
 
@@ -25,7 +26,7 @@ def _base_context(request, active_page):
         "active_page": active_page,
         "is_guest": is_guest,
         "display_name": display_name,
-        "hotlines_url": "#quick-hotlines",
+        "hotlines_url": reverse("hotlines"),
         "guides_url": "#quick-grounding",
         "centers_url": "#dashboard-overview",
     }
@@ -44,3 +45,44 @@ def home_view(request):
         }
     )
     return render(request, "home/home.html", context)
+
+
+@login_or_guest_required
+def hotlines_view(request):
+    """Crisis hotline directory screen with region filters and search."""
+    selected_region = (request.GET.get("region") or "").strip()
+    search_query = (request.GET.get("q") or "").strip()
+
+    filtered_hotlines = CRISIS_HOTLINES
+    if selected_region and selected_region != "All Regions":
+        filtered_hotlines = [
+            h for h in filtered_hotlines if h["region"].lower() == selected_region.lower()
+        ]
+    if search_query:
+        q_lower = search_query.lower()
+        filtered_hotlines = [
+            h
+            for h in filtered_hotlines
+            if q_lower in h["name"].lower()
+            or q_lower in h["description"].lower()
+            or q_lower in h["category"].lower()
+            or q_lower in h["region"].lower()
+            or any(q_lower in n["phone"].lower() for n in h["numbers"])
+        ]
+
+    context = _base_context(request, "hotlines")
+    context.update(
+        {
+            "hotlines": filtered_hotlines,
+            "regions": [
+                "All Regions",
+                "National 24/7",
+                "Visayas / Cebu",
+                "Metro Manila",
+                "Emergency",
+            ],
+            "selected_region": selected_region or "All Regions",
+            "search_query": search_query,
+        }
+    )
+    return render(request, "home/hotlines.html", context)
