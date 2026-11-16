@@ -1,0 +1,239 @@
+{% extends "home/home.html" %}
+
+{% block title %}What To Do (Episode Guides) - Pag-Laum{% endblock %}
+
+{% block main_content %}
+<section class="page-banner">
+    <div>
+        <h1>What To Do During an Episode</h1>
+        <p>
+            Practical, step-by-step grounding guides and calming exercises to help lessen panic,
+            overwhelming thoughts, or heavy emotional episodes—for yourself or someone you care about.
+        </p>
+    </div>
+    <div class="static-disclaimer">
+        Step-by-step non-AI grounding guides curated for immediate episode management
+    </div>
+</section>
+
+<section class="tools-grid" aria-label="Interactive grounding exercises">
+    <div class="panel-card">
+        <div class="panel-header">
+            <h3>4–4–4–4 Box Breathing Pacer</h3>
+            <span class="badge-hours">4s Rhythm</span>
+        </div>
+        <div class="pacer-box">
+            <div class="breathing-circle" id="breathing-circle">
+                <span class="pacer-phase" id="pacer-phase">Ready</span>
+                <span class="pacer-timer" id="pacer-timer">4s</span>
+            </div>
+            <p class="hotline-desc">
+                Follow the gentle circle: Inhale (4s), Hold (4s), Exhale (4s), Rest (4s).
+            </p>
+            <div class="pacer-controls">
+                <button type="button" class="pacer-btn" id="pacer-toggle">Start Breathing</button>
+                <button type="button" class="pacer-btn secondary" id="pacer-reset">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-card">
+        <div class="panel-header">
+            <h3>5–4–3–2–1 Sensory Grounding Checklist</h3>
+            <span class="badge-region" id="grounding-progress">0 / 5 Done</span>
+        </div>
+        <div class="checklist-items" id="grounding-checklist">
+            <button type="button" class="checklist-item" data-step="5">
+                <span><strong>5</strong> things you can see around you</span>
+                <span class="check-state">Tap</span>
+            </button>
+            <button type="button" class="checklist-item" data-step="4">
+                <span><strong>4</strong> things you can physically touch</span>
+                <span class="check-state">Tap</span>
+            </button>
+            <button type="button" class="checklist-item" data-step="3">
+                <span><strong>3</strong> sounds you can hear right now</span>
+                <span class="check-state">Tap</span>
+            </button>
+            <button type="button" class="checklist-item" data-step="2">
+                <span><strong>2</strong> scents you can notice nearby</span>
+                <span class="check-state">Tap</span>
+            </button>
+            <button type="button" class="checklist-item" data-step="1">
+                <span><strong>1</strong> steady truth you appreciate right now</span>
+                <span class="check-state">Tap</span>
+            </button>
+        </div>
+        <div style="margin-top: 12px;">
+            <button type="button" class="pacer-btn secondary" id="checklist-reset">Reset Checklist</button>
+        </div>
+    </div>
+</section>
+
+<section class="filter-toolbar" aria-label="Filter episode guides by category">
+    <div class="filter-pills" role="group" aria-label="Guide categories">
+        {% for category in categories %}
+        <button
+            type="button"
+            class="filter-pill {% if forloop.first %}active{% endif %}"
+            data-category="{{ category }}"
+        >
+            {{ category }}
+        </button>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="guides-list" id="guides-list">
+    {% for guide in guides %}
+    <article class="guide-card" data-category="{{ guide.category }}">
+        <div class="hotline-meta">
+            <span class="badge-region">{{ guide.category }}</span>
+            <span class="badge-hours">{{ guide.urgency }} &bull; {{ guide.duration }}</span>
+        </div>
+
+        <div>
+            <h2>{{ guide.title }}</h2>
+            <p class="hotline-desc">{{ guide.summary }}</p>
+        </div>
+
+        <ol class="guide-steps">
+            {% for step in guide.steps %}
+            <li>
+                <span class="step-badge">{{ forloop.counter }}</span>
+                <div>
+                    <strong>{{ step.title }}:</strong> {{ step.detail }}
+                </div>
+            </li>
+            {% endfor %}
+        </ol>
+
+        <div class="guide-reassurance">
+            {{ guide.reassurance }}
+        </div>
+    </article>
+    {% endfor %}
+</section>
+{% endblock %}
+
+{% block home_extra_scripts %}
+<script>
+    (function () {
+        // 4-4-4-4 Box Breathing Pacer
+        const phases = [
+            { label: "Inhale", cls: "is-inhale" },
+            { label: "Hold", cls: "is-hold" },
+            { label: "Exhale", cls: "is-exhale" },
+            { label: "Rest", cls: "is-rest" },
+        ];
+        const circle = document.getElementById("breathing-circle");
+        const phaseEl = document.getElementById("pacer-phase");
+        const timerEl = document.getElementById("pacer-timer");
+        const toggleBtn = document.getElementById("pacer-toggle");
+        const resetBtn = document.getElementById("pacer-reset");
+
+        let intervalId = null;
+        let phaseIndex = 0;
+        let secondsLeft = 4;
+
+        function renderPacer() {
+            if (!circle || !phaseEl || !timerEl) return;
+            circle.classList.remove("is-inhale", "is-hold", "is-exhale", "is-rest");
+            if (intervalId !== null) {
+                const current = phases[phaseIndex];
+                circle.classList.add(current.cls);
+                phaseEl.textContent = current.label;
+                timerEl.textContent = secondsLeft + "s";
+            } else {
+                phaseEl.textContent = "Ready";
+                timerEl.textContent = "4s";
+            }
+        }
+
+        function stopPacer() {
+            if (intervalId !== null) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+            if (toggleBtn) toggleBtn.textContent = "Start Breathing";
+        }
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener("click", function () {
+                if (intervalId !== null) {
+                    stopPacer();
+                    phaseEl.textContent = "Paused";
+                    return;
+                }
+                toggleBtn.textContent = "Pause";
+                intervalId = setInterval(function () {
+                    secondsLeft -= 1;
+                    if (secondsLeft <= 0) {
+                        phaseIndex = (phaseIndex + 1) % phases.length;
+                        secondsLeft = 4;
+                    }
+                    renderPacer();
+                }, 1000);
+                renderPacer();
+            });
+        }
+
+        if (resetBtn) {
+            resetBtn.addEventListener("click", function () {
+                stopPacer();
+                phaseIndex = 0;
+                secondsLeft = 4;
+                renderPacer();
+            });
+        }
+
+        // 5-4-3-2-1 Checklist
+        const checklistItems = document.querySelectorAll("#grounding-checklist .checklist-item");
+        const progressEl = document.getElementById("grounding-progress");
+        const checklistReset = document.getElementById("checklist-reset");
+
+        function updateChecklistProgress() {
+            const doneCount = document.querySelectorAll("#grounding-checklist .checklist-item.is-done").length;
+            if (progressEl) {
+                progressEl.textContent = doneCount + " / 5 Done";
+            }
+        }
+
+        checklistItems.forEach(function (item) {
+            item.addEventListener("click", function () {
+                const isDone = item.classList.toggle("is-done");
+                const stateSpan = item.querySelector(".check-state");
+                if (stateSpan) stateSpan.textContent = isDone ? "Done" : "Tap";
+                updateChecklistProgress();
+            });
+        });
+
+        if (checklistReset) {
+            checklistReset.addEventListener("click", function () {
+                checklistItems.forEach(function (item) {
+                    item.classList.remove("is-done");
+                    const stateSpan = item.querySelector(".check-state");
+                    if (stateSpan) stateSpan.textContent = "Tap";
+                });
+                updateChecklistProgress();
+            });
+        }
+
+        // Guide Category Filter Pills
+        const categoryPills = document.querySelectorAll(".filter-pill");
+        const guideCards = document.querySelectorAll("#guides-list .guide-card");
+
+        categoryPills.forEach(function (pill) {
+            pill.addEventListener("click", function () {
+                categoryPills.forEach(function (p) { p.classList.remove("active"); });
+                pill.classList.add("active");
+                const chosen = pill.getAttribute("data-category");
+                guideCards.forEach(function (card) {
+                    const cat = card.getAttribute("data-category");
+                    card.style.display = (chosen === "All Guides" || cat === chosen) ? "flex" : "none";
+                });
+            });
+        });
+    })();
+</script>
+{% endblock %}

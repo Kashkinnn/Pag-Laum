@@ -27,7 +27,7 @@ def _base_context(request, active_page):
         "is_guest": is_guest,
         "display_name": display_name,
         "hotlines_url": reverse("hotlines"),
-        "guides_url": "#quick-grounding",
+        "guides_url": reverse("what_to_do"),
         "centers_url": "#dashboard-overview",
     }
 
@@ -86,3 +86,23 @@ def hotlines_view(request):
         }
     )
     return render(request, "home/hotlines.html", context)
+
+
+@login_or_guest_required
+def what_to_do_view(request):
+    """What To Do episode guides and interactive calming grounding tools."""
+    context = _base_context(request, "what_to_do")
+    context.update(
+        {
+            "guides": EPISODE_GUIDES,
+            "categories": [
+                "All Guides",
+                "Anxiety",
+                "Grounding",
+                "Crisis Safety",
+                "Low Mood",
+                "Caregiver Guide",
+            ],
+        }
+    )
+    return render(request, "home/what_to_do.html", context)
