@@ -2,13 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Pag-Laum{% endblock %}</title>
     <style>
+        :root {
+            --primary: #2f6f5e;
+            --primary-dark: #235347;
+            --primary-light: #e8f3ef;
+            --bg: #f0f5f3;
+            --text-main: #1f2937;
+            --text-muted: #64748b;
+            --danger: #b00020;
+            --danger-bg: #fde8e8;
+        }
+        * {
+            box-sizing: border-box;
+        }
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
             margin: 0;
             padding: 0;
+            line-height: 1.5;
         }
         .container {
             max-width: 400px;
@@ -20,7 +36,7 @@
         }
         h1 {
             text-align: center;
-            color: #2f6f5e;
+            color: var(--primary);
         }
         form p {
             margin: 12px 0;
@@ -42,7 +58,7 @@
             width: 100%;
             padding: 10px;
             margin-top: 12px;
-            background-color: #2f6f5e;
+            background-color: var(--primary);
             color: #fff;
             border: none;
             border-radius: 4px;
@@ -56,14 +72,17 @@
             margin-top: 16px;
         }
         .errorlist {
-            color: #b00020;
+            color: var(--danger);
             font-size: 14px;
         }
     </style>
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
+    {% block page_wrapper %}
     <div class="container">
         {% block content %}{% endblock %}
     </div>
+    {% endblock %}
 </body>
 </html>
