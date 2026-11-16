@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Home - Pag-Laum{% endblock %}
+{% block content %}
+    <h1>Pag-Laum</h1>
+    <p style="text-align:center;">Welcome, {{ user.username }}!</p>
+    <p style="text-align:center; color:#666;">
+        You have reached the home screen. This is where hope begins.
+    </p>
+
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
+{% endblock %}

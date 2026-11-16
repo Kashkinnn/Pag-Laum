@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Register - Pag-Laum{% endblock %}
+{% block content %}
+    <h1>Create Account</h1>
+    <p style="text-align:center; color:#666;">Join Pag-Laum</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <p>
+            <label for="{{ form.username.id_for_label }}">Username</label>
+            {{ form.username }}
+            {{ form.username.errors }}
+        </p>
+        <p>
+            <label for="{{ form.password1.id_for_label }}">Password</label>
+            {{ form.password1 }}
+            {{ form.password1.errors }}
+        </p>
+        <p>
+            <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+            {{ form.password2 }}
+            {{ form.password2.errors }}
+        </p>
+        <button type="submit">Register</button>
+    </form>
+
+    <div class="link-row">
+        <span>Already have an account? <a href="{% url 'login' %}">Login here</a></span>
+    </div>
+{% endblock %}
