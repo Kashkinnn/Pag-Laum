@@ -28,7 +28,7 @@ def _base_context(request, active_page):
         "display_name": display_name,
         "hotlines_url": reverse("hotlines"),
         "guides_url": reverse("what_to_do"),
-        "centers_url": "#dashboard-overview",
+        "centers_url": reverse("centers_map"),
     }
 
 
@@ -106,3 +106,21 @@ def what_to_do_view(request):
         }
     )
     return render(request, "home/what_to_do.html", context)
+
+
+@login_or_guest_required
+def centers_map_view(request):
+    """Psychiatric centers OpenStreetMap locator and nearest facility finder."""
+    context = _base_context(request, "centers")
+    context.update(
+        {
+            "centers": PSYCHIATRIC_CENTERS,
+            "regions": [
+                "All Regions",
+                "Visayas / Cebu",
+                "Metro Manila",
+                "Mindanao",
+            ],
+        }
+    )
+    return render(request, "home/centers_map.html", context)

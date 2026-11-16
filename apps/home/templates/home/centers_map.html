@@ -1,0 +1,324 @@
+{% extends "home/home.html" %}
+
+{% block title %}Psychiatric Centers Map - Pag-Laum{% endblock %}
+
+{% block home_extra_head %}
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin=""
+>
+{% endblock %}
+
+{% block main_content %}
+<section class="page-banner">
+    <div>
+        <h1>Psychiatric Centers &amp; Mental Health Facilities Map</h1>
+        <p>
+            Browse hospitals and psychiatric centers with behavioral health emergency units.
+            Use your location to identify the nearest center or explore centers on OpenStreetMap.
+        </p>
+    </div>
+    <div>
+        <button type="button" class="pacer-btn" id="btn-find-nearest">
+            Find Nearest Center to Me
+        </button>
+    </div>
+</section>
+
+<section class="filter-toolbar" aria-label="Filter psychiatric centers">
+    <div class="filter-pills" role="group" aria-label="Filter by region">
+        {% for region in regions %}
+        <button
+            type="button"
+            class="filter-pill {% if forloop.first %}active{% endif %}"
+            data-region="{{ region }}"
+        >
+            {{ region }}
+        </button>
+        {% endfor %}
+    </div>
+
+    <input
+        type="search"
+        id="center-search"
+        class="search-input-box"
+        placeholder="Search hospital, city, or service..."
+        aria-label="Search psychiatric centers"
+    >
+</section>
+
+<section class="centers-layout">
+    <div class="map-panel">
+        <div id="centers-map" aria-label="OpenStreetMap of Psychiatric Centers"></div>
+        <div class="map-status-bar" id="map-status">
+            Showing {{ centers|length }} psychiatric centers across the Philippines. Click "Find Nearest Center to Me" to locate the closest facility.
+        </div>
+    </div>
+
+    <div class="centers-list" id="centers-list">
+        {% for center in centers %}
+        <article
+            class="center-card"
+            data-id="{{ center.id }}"
+            data-region="{{ center.region }}"
+            data-lat="{{ center.lat }}"
+            data-lng="{{ center.lng }}"
+        >
+            <div class="hotline-meta">
+                <span class="badge-region">{{ center.region }}</span>
+                {% if center.emergency_available %}
+                <span class="badge-hours">24/7 Emergency Ready</span>
+                {% endif %}
+            </div>
+
+            <div>
+                <span class="nearest-badge" style="display: none; margin-bottom: 6px;"></span>
+                <h2>{{ center.name }}</h2>
+            </div>
+
+            <p class="center-meta-line">
+                <strong>Address:</strong> {{ center.address }}<br>
+                <strong>Hours:</strong> {{ center.hours }}<br>
+                <strong>Phone:</strong> {{ center.phone }}
+            </p>
+
+            <div class="service-tags">
+                {% for service in center.services %}
+                <span class="service-tag">{{ service }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="center-actions">
+                <button
+                    type="button"
+                    class="center-action-btn btn-focus-map"
+                    data-id="{{ center.id }}"
+                >
+                    Focus on Map
+                </button>
+                <a href="tel:{{ center.dial }}" class="center-action-btn outline">Call Center</a>
+                <a
+                    href="https://www.openstreetmap.org/?mlat={{ center.lat }}&amp;mlon={{ center.lng }}#map=17/{{ center.lat }}/{{ center.lng }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="center-action-btn outline"
+                >
+                    Open in OpenStreetMap
+                </a>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+
+{{ centers|json_script:"centers-data" }}
+{% endblock %}
+
+{% block home_extra_scripts %}
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    crossorigin=""
+></script>
+<script>
+    (function () {
+        const centersEl = document.getElementById("centers-data");
+        const centers = centersEl ? JSON.parse(centersEl.textContent) : [];
+        const statusBar = document.getElementById("map-status");
+        const mapContainer = document.getElementById("centers-map");
+        const cards = Array.from(document.querySelectorAll("#centers-list .center-card"));
+        const regionButtons = document.querySelectorAll(".filter-pill");
+        const searchInput = document.getElementById("center-search");
+        const nearestBtn = document.getElementById("btn-find-nearest");
+
+        let activeRegion = "All Regions";
+        let map = null;
+        let userMarker = null;
+        const markersById = {};
+
+        function haversineKm(lat1, lon1, lat2, lon2) {
+            const toRad = function (deg) { return (deg * Math.PI) / 180; };
+            const R = 6371;
+            const dLat = toRad(lat2 - lat1);
+            const dLon = toRad(lon2 - lon1);
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+        }
+
+        if (typeof L !== "undefined" && mapContainer) {
+            map = L.map("centers-map").setView([11.8, 122.8], 6);
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                maxZoom: 19,
+                attribution: "&copy; OpenStreetMap contributors",
+            }).addTo(map);
+
+            centers.forEach(function (c) {
+                const marker = L.marker([c.lat, c.lng]).addTo(map);
+                marker.bindPopup(
+                    "<strong>" + c.name + "</strong><br>" +
+                    c.address + "<br>" +
+                    "Tel: " + c.phone
+                );
+                markersById[c.id] = marker;
+            });
+        } else if (mapContainer) {
+            mapContainer.innerHTML =
+                '<div style="padding: 36px; text-align: center; color: #365249;">' +
+                "<strong>Interactive Map Tile Preview Unavailable Offline</strong><br>" +
+                "You can still use the directory cards, 'Find Nearest Center to Me', and 'Open in OpenStreetMap' links." +
+                "</div>";
+        }
+
+        function focusCenter(centerId) {
+            const target = centers.find(function (c) { return c.id === centerId; });
+            if (!target) return;
+            if (map && markersById[centerId]) {
+                map.setView([target.lat, target.lng], 15, { animate: true });
+                markersById[centerId].openPopup();
+            }
+            if (statusBar) {
+                statusBar.textContent = "Focused on " + target.name + " (" + target.city + ").";
+            }
+        }
+
+        document.querySelectorAll(".btn-focus-map").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                focusCenter(btn.getAttribute("data-id"));
+            });
+        });
+
+        function applyFilters() {
+            const query = (searchInput ? searchInput.value : "").trim().toLowerCase();
+            let visibleCount = 0;
+            const visibleCoords = [];
+
+            cards.forEach(function (card) {
+                const region = card.getAttribute("data-region");
+                const text = card.textContent.toLowerCase();
+                const matchesRegion = activeRegion === "All Regions" || region === activeRegion;
+                const matchesQuery = !query || text.includes(query);
+                const visible = matchesRegion && matchesQuery;
+
+                card.style.display = visible ? "flex" : "none";
+                if (visible) {
+                    visibleCount += 1;
+                    visibleCoords.push([
+                        parseFloat(card.getAttribute("data-lat")),
+                        parseFloat(card.getAttribute("data-lng")),
+                    ]);
+                }
+            });
+
+            if (map && visibleCoords.length > 0 && typeof L !== "undefined") {
+                map.fitBounds(L.latLngBounds(visibleCoords).pad(0.25), { maxZoom: 14 });
+            }
+
+            if (statusBar) {
+                statusBar.textContent = "Showing " + visibleCount + " psychiatric center(s) for " + activeRegion + ".";
+            }
+        }
+
+        regionButtons.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                regionButtons.forEach(function (b) { b.classList.remove("active"); });
+                btn.classList.add("active");
+                activeRegion = btn.getAttribute("data-region");
+                applyFilters();
+            });
+        });
+
+        if (searchInput) {
+            searchInput.addEventListener("input", applyFilters);
+        }
+
+        if (nearestBtn) {
+            nearestBtn.addEventListener("click", function () {
+                if (!navigator.geolocation) {
+                    if (statusBar) {
+                        statusBar.textContent = "Location services are not supported by this browser. Use the region filters to browse centers.";
+                    }
+                    return;
+                }
+
+                if (statusBar) {
+                    statusBar.textContent = "Detecting your approximate location to find the closest psychiatric center...";
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    function (pos) {
+                        const userLat = pos.coords.latitude;
+                        const userLng = pos.coords.longitude;
+
+                        let nearestCenter = null;
+                        let nearestDist = Infinity;
+
+                        centers.forEach(function (c) {
+                            const d = haversineKm(userLat, userLng, c.lat, c.lng);
+                            if (d < nearestDist) {
+                                nearestDist = d;
+                                nearestCenter = c;
+                            }
+                        });
+
+                        cards.forEach(function (card) {
+                            card.classList.remove("is-nearest");
+                            const badge = card.querySelector(".nearest-badge");
+                            if (badge) badge.style.display = "none";
+                        });
+
+                        if (nearestCenter) {
+                            const nearestCard = cards.find(function (card) {
+                                return card.getAttribute("data-id") === nearestCenter.id;
+                            });
+                            if (nearestCard) {
+                                nearestCard.classList.add("is-nearest");
+                                const badge = nearestCard.querySelector(".nearest-badge");
+                                if (badge) {
+                                    badge.textContent = "Nearest to You (~" + nearestDist.toFixed(1) + " km)";
+                                    badge.style.display = "inline-block";
+                                }
+                                nearestCard.parentNode.prepend(nearestCard);
+                            }
+
+                            if (map && typeof L !== "undefined") {
+                                if (userMarker) map.removeLayer(userMarker);
+                                userMarker = L.circleMarker([userLat, userLng], {
+                                    radius: 8,
+                                    color: "#1d4ed8",
+                                    fillColor: "#3b82f6",
+                                    fillOpacity: 0.9,
+                                }).addTo(map).bindPopup("Your approximate location");
+
+                                map.fitBounds(
+                                    L.latLngBounds([
+                                        [userLat, userLng],
+                                        [nearestCenter.lat, nearestCenter.lng],
+                                    ]).pad(0.25)
+                                );
+                                if (markersById[nearestCenter.id]) {
+                                    markersById[nearestCenter.id].openPopup();
+                                }
+                            }
+
+                            if (statusBar) {
+                                statusBar.textContent =
+                                    "Nearest center: " + nearestCenter.name +
+                                    " (~" + nearestDist.toFixed(1) + " km away).";
+                            }
+                        }
+                    },
+                    function () {
+                        if (statusBar) {
+                            statusBar.textContent =
+                                "Location permission was denied or unavailable. Please select your region above to locate nearby centers.";
+                        }
+                    }
+                );
+            });
+        }
+    })();
+</script>
+{% endblock %}
