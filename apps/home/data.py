@@ -392,3 +392,14 @@ PSYCHIATRIC_CENTERS = [
         "emergency_available": True,
     },
 ]
+
+# Maps each CrisisHotline slug to its receiving PsychiatricCenter slug (One-to-Many relationship).
+HOTLINE_CENTER_REFERRALS = {
+    "ncmh-1553": "ncmh-mandaluyong",
+    "hopeline-ph": "ncmh-mandaluyong",
+    "tawag-paglaum": "vsmmc-cbs",
+    "vsmmc-cbs": "vsmmc-cbs",
+    "in-touch": "pgh-psychiatry",
+    "manila-lifeline": "pgh-psychiatry",
+    "emergency-911": "spmc-ipbm-davao",
+}

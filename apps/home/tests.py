@@ -9,7 +9,12 @@ from django.urls import reverse
 from pag_laum.supabase_client import build_rest_url, fetch_table
 
 from .models import CrisisHotline, EpisodeGuide, PsychiatricCenter
-from .views import get_hotlines_data
+from .views import (
+    build_dispatch_subquery_queryset,
+    build_referral_join_queryset,
+    ensure_relational_data_seeded,
+    get_hotlines_data,
+)
 
 
 class HomeScreensTests(TestCase):
@@ -23,11 +28,15 @@ class HomeScreensTests(TestCase):
         self.hotlines_url = reverse("hotlines")
         self.what_to_do_url = reverse("what_to_do")
         self.centers_map_url = reverse("centers_map")
+        self.referral_join_url = reverse("referral_network_join")
+        self.dispatch_subquery_url = reverse("dispatch_centers_subquery")
         self.protected_urls = [
             self.home_url,
             self.hotlines_url,
             self.what_to_do_url,
             self.centers_map_url,
+            self.referral_join_url,
+            self.dispatch_subquery_url,
         ]
         self.user = User.objects.create_user(
             username="dashboard_member",
@@ -180,3 +189,74 @@ class SupabaseIntegrationTests(TestCase):
         self.assertEqual(CrisisHotline.objects.count(), 1)
         self.assertEqual(EpisodeGuide.objects.count(), 1)
         self.assertEqual(PsychiatricCenter.objects.count(), 1)
+
+
+class RelationalDatabaseOperationsTests(TestCase):
+    """Tests for Django ORM SQL JOIN (select_related) and SQL SUBQUERY (Subquery + OuterRef) features."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="relational_tester",
+            password="TesterPassword123!",
+        )
+        self.client.force_login(self.user)
+        self.referral_join_url = reverse("referral_network_join")
+        self.dispatch_subquery_url = reverse("dispatch_centers_subquery")
+
+    def test_join_query_and_view_display_both_tables(self):
+        ensure_relational_data_seeded()
+        join_qs = build_referral_join_queryset()
+        sql = str(join_qs.query)
+
+        self.assertIn("INNER JOIN", sql)
+        self.assertIn("home_app_psychiatriccenter", sql)
+        self.assertIn("home_app_crisishotline", sql)
+        self.assertEqual(join_qs.count(), 7)
+
+        response = self.client.get(self.referral_join_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Hotline-to-Hospital Referral Network")
+        self.assertContains(response, "Tawag Paglaum")
+        self.assertContains(response, "Vicente Sotto Memorial Medical Center")
+        self.assertContains(response, "B. Rodriguez St")
+        self.assertContains(response, "INNER JOIN")
+
+        filtered_resp = self.client.get(self.referral_join_url, {"region": "Visayas / Cebu"})
+        self.assertEqual(filtered_resp.status_code, 200)
+        self.assertEqual(filtered_resp.context["total_joined_count"], 2)
+        self.assertEqual(filtered_resp.context["distinct_centers_count"], 1)
+
+    def test_subquery_query_and_view_filter_modes(self):
+        ensure_relational_data_seeded()
+
+        all_linked_qs = build_dispatch_subquery_queryset("all_linked")
+        featured_qs = build_dispatch_subquery_queryset("featured")
+        walkin_qs = build_dispatch_subquery_queryset("walkin_only")
+
+        all_linked_sql = str(all_linked_qs.query)
+        walkin_sql = str(walkin_qs.query)
+
+        self.assertIn("IN (SELECT", all_linked_sql)
+        self.assertIn("WHERE", all_linked_sql)
+        self.assertIn("primary_hotline_name", all_linked_sql)
+        self.assertIn("NOT (", walkin_sql)
+        self.assertIn("IN (SELECT", walkin_sql)
+
+        self.assertEqual(all_linked_qs.count(), 4)
+        self.assertEqual(featured_qs.count(), 3)
+        self.assertEqual(walkin_qs.count(), 3)
+
+        resp_all = self.client.get(self.dispatch_subquery_url, {"mode": "all_linked"})
+        self.assertEqual(resp_all.status_code, 200)
+        self.assertEqual(resp_all.context["matched_centers_count"], 4)
+        self.assertContains(resp_all, "National Center for Mental Health (NCMH) Crisis Hotline")
+
+        resp_featured = self.client.get(self.dispatch_subquery_url, {"mode": "featured"})
+        self.assertEqual(resp_featured.status_code, 200)
+        self.assertEqual(resp_featured.context["matched_centers_count"], 3)
+
+        resp_walkin = self.client.get(self.dispatch_subquery_url, {"mode": "walkin_only"})
+        self.assertEqual(resp_walkin.status_code, 200)
+        self.assertEqual(resp_walkin.context["matched_centers_count"], 3)
+        self.assertContains(resp_walkin, "Chong Hua Hospital")
+        self.assertContains(resp_walkin, "Western Visayas Medical Center")

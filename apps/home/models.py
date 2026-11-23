@@ -12,6 +12,13 @@ class CrisisHotline(models.Model):
     description = models.TextField()
     numbers = models.JSONField(default=list)
     is_featured = models.BooleanField(default=False)
+    center = models.ForeignKey(
+        "PsychiatricCenter",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="hotlines",
+    )
 
     def __str__(self) -> str:
         return self.name
