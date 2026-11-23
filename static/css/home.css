@@ -75,21 +75,24 @@ html[data-contrast="high"] .app-header {
     display: flex;
     align-items: center;
     gap: 4px;
-    flex-wrap: wrap;
+    padding: 4px;
+    border-radius: 14px;
+    background: var(--primary-soft);
+    border: 1px solid var(--border-subtle);
 }
 
 .nav-link {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    min-height: 40px;
-    padding: 7px 9px;
+    gap: 6px;
+    min-height: 38px;
+    padding: 7px 12px;
     border-radius: 10px;
     text-decoration: none;
-    font-size: 0.8125rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-muted);
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     white-space: nowrap;
 }
 
@@ -100,13 +103,89 @@ html[data-contrast="high"] .app-header {
 }
 
 .nav-link:hover {
-    background: var(--primary-light);
+    background: var(--surface);
     color: var(--primary-dark);
 }
 
 .nav-link.active {
     background: var(--primary);
     color: #ffffff;
+    box-shadow: 0 2px 8px rgba(23, 63, 51, 0.22);
+}
+
+/* Care Centers Dropdown */
+.nav-dropdown {
+    position: relative;
+}
+
+.nav-dropdown-trigger {
+    width: auto;
+    margin-top: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.nav-chevron {
+    width: 15px;
+    height: 15px;
+    transition: transform 0.18s ease;
+}
+
+.nav-dropdown.is-open .nav-chevron {
+    transform: rotate(180deg);
+}
+
+.nav-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 280px;
+    padding: 8px;
+    border-radius: 16px;
+    background: var(--surface);
+    border: 1.5px solid var(--border-subtle);
+    box-shadow: 0 16px 36px rgba(23, 63, 51, 0.14);
+    z-index: 200;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nav-dropdown.is-open .nav-dropdown-menu {
+    display: flex;
+}
+
+.nav-dropdown-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--text-main);
+    transition: background-color 0.15s ease;
+}
+
+.nav-dropdown-item strong {
+    font-size: 0.875rem;
+    color: var(--primary-dark);
+}
+
+.nav-dropdown-item span {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    line-height: 1.35;
+}
+
+.nav-dropdown-item:hover {
+    background: var(--primary-soft);
+}
+
+.nav-dropdown-item.active {
+    background: var(--primary-light);
+    border-left: 3px solid var(--primary);
 }
 
 .nav-user {
@@ -2210,7 +2289,7 @@ html[data-contrast="high"] .app-header {
     }
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1040px) {
     .nav-mobile-toggle {
         display: inline-flex;
         align-items: center;
@@ -2227,11 +2306,25 @@ html[data-contrast="high"] .app-header {
         width: 100%;
         flex-direction: column;
         align-items: stretch;
-        padding-top: 8px;
+        padding: 10px;
+        margin-top: 8px;
     }
 
     .nav-links.is-open {
         display: flex;
+    }
+
+    .nav-dropdown-trigger {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .nav-dropdown-menu {
+        position: static;
+        box-shadow: none;
+        margin-top: 6px;
+        min-width: 0;
+        background: var(--surface);
     }
 
     .nav-user {
