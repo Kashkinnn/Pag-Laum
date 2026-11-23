@@ -64,10 +64,16 @@
                     <span>Psychiatric Centers</span>
                 </a>
                 <a href="{{ referral_join_url }}" class="nav-link {% if active_page == 'referral_join' %}active{% endif %}">
-                    <span>Referral Network (JOIN)</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                    </svg>
+                    <span>Referral Network</span>
                 </a>
                 <a href="{{ dispatch_subquery_url }}" class="nav-link {% if active_page == 'dispatch_subquery' %}active{% endif %}">
-                    <span>Dispatch Centers (Subquery)</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                    </svg>
+                    <span>Dispatch Centers</span>
                 </a>
             </nav>
 
@@ -248,8 +254,8 @@
             </div>
         </section>
 
-        <h2 class="section-heading relational-section-heading">Relational Care Network Tools</h2>
-        <section class="relational-grid" aria-label="Pag-Laum relational database modules">
+        <h2 class="section-heading relational-section-heading">Connected Care &amp; Hospital Pathways</h2>
+        <section class="relational-grid" aria-label="Pag-Laum connected care modules">
             <article class="feature-card">
                 <div>
                     <div class="feature-card-top">
@@ -258,15 +264,15 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                             </svg>
                         </span>
-                        <span class="feature-count">SQL INNER JOIN</span>
+                        <span class="feature-count">Care Pathways</span>
                     </div>
                     <h2>Hotline-to-Hospital Referral Network</h2>
                     <p>
-                        Combines each Crisis Hotline with its linked receiving Psychiatric Center using
-                        Django ORM <code>select_related("center")</code> across the One-to-Many relationship.
+                        See which receiving psychiatric hospital or medical center each 24/7 crisis hotline
+                        partners with for seamless in-person evaluation and follow-up support.
                     </p>
                 </div>
-                <a href="{{ referral_join_url }}" class="feature-card-link">Open Referral Network (JOIN) &rarr;</a>
+                <a href="{{ referral_join_url }}" class="feature-card-link">Open Referral Network &rarr;</a>
             </article>
 
             <article class="feature-card">
@@ -277,15 +283,15 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
                             </svg>
                         </span>
-                        <span class="feature-count">SQL SUBQUERY</span>
+                        <span class="feature-count">Facility Finder</span>
                     </div>
                     <h2>Dispatch-Backed Centers Finder</h2>
                     <p>
-                        Filters Psychiatric Centers using an explicit nested <code>Subquery</code> and
-                        <code>OuterRef</code> lookup against linked Crisis Hotlines.
+                        Browse psychiatric facilities by care access mode&mdash;whether they coordinate directly
+                        with 24/7 telephone crisis dispatch teams or accept direct walk-in admissions.
                     </p>
                 </div>
-                <a href="{{ dispatch_subquery_url }}" class="feature-card-link">Open Dispatch Centers (Subquery) &rarr;</a>
+                <a href="{{ dispatch_subquery_url }}" class="feature-card-link">Open Dispatch Centers &rarr;</a>
             </article>
         </section>
         {% endblock %}
