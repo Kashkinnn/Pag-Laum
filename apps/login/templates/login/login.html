@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block page_wrapper %}
-<main class="auth-wrapper">
+<main id="main-content" class="auth-wrapper">
     <section class="auth-card" aria-label="Pag-Laum Sign In">
         <aside class="brand-panel">
             <div class="brand-top">
@@ -16,13 +16,13 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c4.97 0 9 4.03 9 9-4.97 0-9 4.03-9 9 0-4.97-4.03-9-9-9 4.97 0 9-4.03 9-9z" />
                     </svg>
-                    <span>Crisis Support &amp; Guidance</span>
+                    <span>Calm Sanctuary &amp; Crisis Support</span>
                 </div>
 
                 <h1 class="brand-title">Pag-Laum</h1>
                 <p class="brand-tagline">Where hope begins</p>
                 <p class="brand-description">
-                    A safe, accessible resource storing verified crisis hotlines, psychiatric center locations, and practical episode guides for your darkest moments.
+                    A warm, accessible sanctuary storing verified crisis hotlines, psychiatric center locations, and practical episode coping guides for your heaviest moments.
                 </p>
 
                 <ul class="brand-features">
@@ -53,15 +53,19 @@
                 </ul>
             </div>
 
-            <div class="brand-quote">
-                "You don't have to face heavy moments alone — immediate help and hope are always within reach."
+            <div class="brand-calm-card">
+                <div class="brand-calm-title">Take a slow breath before you begin</div>
+                <p class="brand-quote">
+                    "You don't have to carry everything by yourself — calm, judgment-free support and real help are always within reach."
+                </p>
             </div>
         </aside>
 
         <div class="form-panel">
             <div class="form-header">
+                <div class="welcome-pill">Safe, Confidential &amp; Judgment-Free</div>
                 <h2>Welcome Back</h2>
-                <p>Sign in to access your Pag-Laum support dashboard</p>
+                <p>Sign in to open your Pag-Laum support dashboard at your own pace</p>
             </div>
 
             {% if form.non_field_errors %}
@@ -84,7 +88,7 @@
                         {{ form.username }}
                     </div>
                     {% if form.username.errors %}
-                    <div class="field-error">{{ form.username.errors }}</div>
+                    <div class="field-error" role="alert">{{ form.username.errors }}</div>
                     {% endif %}
                 </div>
 
@@ -111,7 +115,7 @@
                         </button>
                     </div>
                     {% if form.password.errors %}
-                    <div class="field-error">{{ form.password.errors }}</div>
+                    <div class="field-error" role="alert">{{ form.password.errors }}</div>
                     {% endif %}
                 </div>
 
@@ -126,17 +130,21 @@
                 <button type="submit" class="btn-submit">Sign In to Pag-Laum</button>
             </form>
 
-            <div class="divider-text">Want to stay anonymous?</div>
-
-            <a href="{% url 'guest_login' %}" class="btn-guest">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7.5 3v6c0 4.55-3.2 8.74-7.5 9.75C7.7 20.74 4.5 16.55 4.5 12V6L12 3z" />
-                </svg>
-                <span>Continue as Guest (Anonymous)</span>
-            </a>
-            <p class="guest-caption">
-                Access crisis hotlines, episode guides, and the psychiatric center map immediately without saving an account.
-            </p>
+            <section class="guest-sanctuary-box" aria-label="Immediate anonymous access">
+                <div class="guest-sanctuary-header">
+                    <strong>Need help right now without signing in?</strong>
+                    <span>Skip the form and enter privately—no personal data is collected.</span>
+                </div>
+                <a href="{% url 'guest_login' %}" class="btn-guest">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7.5 3v6c0 4.55-3.2 8.74-7.5 9.75C7.7 20.74 4.5 16.55 4.5 12V6L12 3z" />
+                    </svg>
+                    <span>Continue as Guest (Anonymous)</span>
+                </a>
+                <p class="guest-caption">
+                    Access 24/7 crisis hotlines, calming breathing exercises, and the psychiatric center map right away.
+                </p>
+            </section>
 
             <div class="auth-footer">
                 New to Pag-Laum? <a href="{% url 'register' %}">Create an account</a>
