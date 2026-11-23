@@ -1,0 +1,158 @@
+{% extends "home/home.html" %}
+
+{% block title %}Dispatch Centers (SQL Subquery) - Pag-Laum{% endblock %}
+
+{% block main_content %}
+<section class="page-banner">
+    <div>
+        <div class="relational-eyebrow">Nested SQL Subquery &bull; Subquery() + OuterRef("pk")</div>
+        <h1>Dispatch-Backed Psychiatric Centers Finder</h1>
+        <p>
+            Filters parent <code>PsychiatricCenter</code> records (outer query) against a nested
+            <code>SELECT</code> subquery on <code>CrisisHotline</code> (inner query), and annotates each
+            matching hospital with its highest-priority linked hotline via <code>OuterRef("pk")</code>.
+        </p>
+    </div>
+    <div class="static-disclaimer">
+        Showing <strong>{{ matched_centers_count }}</strong> of <strong>{{ total_centers_count }}</strong>
+        psychiatric centers
+    </div>
+</section>
+
+<section class="relational-metrics-strip" aria-label="Subquery filter summary">
+    <div class="relational-metric-card">
+        <span class="metric-label">Matched Psychiatric Centers</span>
+        <strong class="metric-value">{{ matched_centers_count }}</strong>
+        <span class="metric-sub">Facilities returned by current outer query</span>
+    </div>
+    <div class="relational-metric-card">
+        <span class="metric-label">Total Facilities Evaluated</span>
+        <strong class="metric-value">{{ total_centers_count }}</strong>
+        <span class="metric-sub">{{ all_linked_count }} hotline-linked &bull; {{ walkin_count }} walk-in only</span>
+    </div>
+    <div class="relational-metric-card">
+        <span class="metric-label">Query Strategy</span>
+        <strong class="metric-value metric-value-sm">Nested SQL Subquery + OuterRef("pk")</strong>
+        <span class="metric-sub">Correlated inner lookup on <code>CrisisHotline</code></span>
+    </div>
+</section>
+
+<section class="filter-toolbar" aria-label="Select SQL Subquery filter mode">
+    <div class="filter-pills" role="group" aria-label="Subquery modes">
+        <a
+            href="{{ dispatch_subquery_url }}?mode=all_linked"
+            class="filter-pill filter-pill-link {% if filter_mode == 'all_linked' %}active{% endif %}"
+        >
+            All Dispatch-Backed Centers ({{ all_linked_count }} of {{ total_centers_count }})
+        </a>
+        <a
+            href="{{ dispatch_subquery_url }}?mode=featured"
+            class="filter-pill filter-pill-link {% if filter_mode == 'featured' %}active{% endif %}"
+        >
+            24/7 Featured Hotline Centers ({{ featured_count }} of {{ total_centers_count }})
+        </a>
+        <a
+            href="{{ dispatch_subquery_url }}?mode=walkin_only"
+            class="filter-pill filter-pill-link {% if filter_mode == 'walkin_only' %}active{% endif %}"
+        >
+            Walk-In Only Centers &mdash; Excluded by Subquery ({{ walkin_count }} of {{ total_centers_count }})
+        </a>
+    </div>
+    <a href="{{ referral_join_url }}" class="panel-more-link">
+        Switch to Referral Network (JOIN) &rarr;
+    </a>
+</section>
+
+<section class="panel-card relational-table-card" aria-label="Subquery-filtered PsychiatricCenter results">
+    <div class="panel-header">
+        <h3>
+            {% if filter_mode == "featured" %}
+                Outer Query Results: Centers Linked to Featured 24/7 Hotlines (IN Subquery)
+            {% elif filter_mode == "walkin_only" %}
+                Outer Query Results: Walk-In Centers With No Linked Hotline (NOT IN Subquery)
+            {% else %}
+                Outer Query Results: Centers With Active Hotline Dispatch Links (IN Subquery)
+            {% endif %}
+        </h3>
+        <span class="badge-hours">
+            {% if filter_mode == "walkin_only" %}exclude(id__in=Subquery(...)){% else %}filter(id__in=Subquery(...)){% endif %}
+        </span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="relational-table">
+            <thead>
+                <tr>
+                    <th>Center PK &amp; Hospital Name <span class="th-sub">(Outer: PsychiatricCenter)</span></th>
+                    <th>City &amp; Region <span class="th-sub">(Outer: PsychiatricCenter)</span></th>
+                    <th>Emergency &amp; Hours <span class="th-sub">(Outer: PsychiatricCenter)</span></th>
+                    <th>Phone <span class="th-sub">(Outer: PsychiatricCenter)</span></th>
+                    <th>Primary Linked Hotline <span class="th-sub">(Inner Subquery + OuterRef)</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for center in centers %}
+                <tr>
+                    <td>
+                        <div class="cell-primary">{{ center.name }}</div>
+                        <div class="cell-meta">PK #{{ center.id }} &bull; <code>{{ center.slug }}</code></div>
+                    </td>
+                    <td>
+                        <span class="badge-region">{{ center.region }}</span>
+                        <div class="cell-meta" style="margin-top: 6px;">{{ center.city }}</div>
+                    </td>
+                    <td>
+                        {% if center.emergency_available %}
+                        <span class="badge-hours">24/7 Emergency Ready</span>
+                        {% endif %}
+                        <div class="cell-meta" style="margin-top: 6px;">{{ center.hours }}</div>
+                    </td>
+                    <td>
+                        <div class="cell-primary">{{ center.phone }}</div>
+                        <a href="tel:{{ center.dial }}" class="table-call-link">Call Center</a>
+                    </td>
+                    <td>
+                        {% if filter_mode == "walkin_only" %}
+                        <span class="walkin-pill">No Linked Hotline (Walk-In / Direct ER Only)</span>
+                        {% else %}
+                        <span class="fk-pill" style="margin-bottom: 6px;">Dispatch Linked</span>
+                        <div class="cell-primary">{{ center.primary_hotline_name }}</div>
+                        <div class="cell-meta">{{ center.primary_hotline_category }}</div>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="empty-table-cell">No psychiatric centers matched this subquery filter.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="panel-card sql-proof-card" aria-label="Inner and Outer SQL Subquery verification">
+    <div class="panel-header">
+        <h3>Inner Query vs. Outer Query SQL Verification</h3>
+        <span class="badge-region">apps/home/views.py &rarr; build_dispatch_subquery_queryset()</span>
+    </div>
+
+    <div class="sql-step-block">
+        <p class="hotline-desc">
+            <strong>1. Inner Query</strong> (<code>CrisisHotline.objects.filter(...).values("center_id")</code>) selects
+            matching foreign key IDs:
+        </p>
+        <pre class="sql-code-block"><code>{{ inner_sql }}</code></pre>
+    </div>
+
+    <div class="sql-step-block">
+        <p class="hotline-desc">
+            <strong>2. Full Outer Query</strong> wraps the inner query inside <code>Subquery(...)</code>
+            {% if filter_mode != "walkin_only" %}
+            and evaluates correlated <code>OuterRef("pk")</code> subqueries for each row
+            {% endif %}:
+        </p>
+        <pre class="sql-code-block"><code>{{ generated_sql }}</code></pre>
+    </div>
+</section>
+{% endblock %}

@@ -1630,6 +1630,14 @@ html[data-contrast="high"] .app-header {
     background: var(--primary-soft);
 }
 
+.sql-step-block + .sql-step-block {
+    margin-top: 18px;
+}
+
+.sql-step-block .hotline-desc {
+    margin-bottom: 8px;
+}
+
 .sql-code-block {
     margin: 0;
     padding: 16px 18px;
