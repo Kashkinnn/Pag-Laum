@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block page_wrapper %}
-<main class="auth-wrapper">
+<main id="main-content" class="auth-wrapper">
     <section class="auth-card" aria-label="Pag-Laum Create Account">
         <aside class="brand-panel">
             <div class="brand-top">
@@ -22,7 +22,7 @@
                 <h1 class="brand-title">Pag-Laum</h1>
                 <p class="brand-tagline">Where hope begins</p>
                 <p class="brand-description">
-                    Create your personal wellness account to access confidential counseling support, mindful self-care tools, and a compassionate community.
+                    Create a private wellness account to keep verified crisis hotlines, calming episode guides, and psychiatric center directions within easy reach.
                 </p>
 
                 <ul class="brand-features">
@@ -40,7 +40,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
                         </span>
-                        <span>Personalized Wellness Check-ins</span>
+                        <span>Pseudonyms Always Welcome</span>
                     </li>
                     <li>
                         <span class="feature-icon" aria-hidden="true">
@@ -48,20 +48,24 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
                         </span>
-                        <span>Guided Counseling &amp; Support</span>
+                        <span>24/7 Hotlines &amp; Grounding Guides</span>
                     </li>
                 </ul>
             </div>
 
-            <div class="brand-quote">
-                "Every new beginning starts with the courage to care for your peace of mind."
+            <div class="brand-calm-card">
+                <div class="brand-calm-title">You go at your own pace</div>
+                <p class="brand-quote">
+                    "Every new beginning starts with the courage to care for your peace of mind. You don't even have to use your real name here."
+                </p>
             </div>
         </aside>
 
         <div class="form-panel">
             <div class="form-header">
+                <div class="welcome-pill">Private &amp; Pseudonym-Friendly</div>
                 <h2>Create Account</h2>
-                <p>Join Pag-Laum in just a few simple steps</p>
+                <p>Join Pag-Laum in just a few gentle steps</p>
             </div>
 
             {% if form.non_field_errors %}
@@ -85,8 +89,9 @@
                         </span>
                         {{ form.username }}
                     </div>
+                    <div class="field-hint">You may use a nickname or pseudonym&mdash;your real name is never required.</div>
                     {% if form.username.errors %}
-                    <div class="field-error">{{ form.username.errors }}</div>
+                    <div class="field-error" role="alert">{{ form.username.errors }}</div>
                     {% endif %}
                 </div>
 
@@ -103,8 +108,9 @@
                         </span>
                         {{ form.email }}
                     </div>
+                    <div class="field-hint">Optional&mdash;only used if you ever need to reset your password.</div>
                     {% if form.email.errors %}
-                    <div class="field-error">{{ form.email.errors }}</div>
+                    <div class="field-error" role="alert">{{ form.email.errors }}</div>
                     {% endif %}
                 </div>
 
@@ -133,7 +139,7 @@
                         </button>
                     </div>
                     {% if form.password1.errors %}
-                    <div class="field-error">{{ form.password1.errors }}</div>
+                    <div class="field-error" role="alert">{{ form.password1.errors }}</div>
                     {% endif %}
                 </div>
 
@@ -162,19 +168,30 @@
                         </button>
                     </div>
                     {% if form.password2.errors %}
-                    <div class="field-error">{{ form.password2.errors }}</div>
+                    <div class="field-error" role="alert">{{ form.password2.errors }}</div>
                     {% endif %}
                 </div>
 
                 <div class="privacy-note">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
                     </svg>
-                    <span>Your privacy is protected. Your identity and wellness sessions remain strictly confidential.</span>
+                    <div>
+                        <strong>Sanctuary Privacy Guarantee</strong>
+                        <span>Your privacy is protected. Your identity and wellness sessions remain strictly confidential.</span>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn-submit">Create My Pag-Laum Account</button>
             </form>
+
+            <section class="guest-sanctuary-box" aria-label="Skip signup for urgent support">
+                <div class="guest-sanctuary-header">
+                    <strong>In distress right now? Skip creating an account.</strong>
+                    <span>Enter immediately to view crisis lines, calming steps, and nearby hospitals.</span>
+                </div>
+                <a href="{% url 'guest_login' %}" class="btn-guest-outline">Continue as Guest (Anonymous)</a>
+            </section>
 
             <div class="auth-footer">
                 Already have an account? <a href="{% url 'login' %}">Sign in here</a>
@@ -194,6 +211,7 @@
                 const isHidden = passwordInput.type === "password";
                 passwordInput.type = isHidden ? "text" : "password";
                 toggleButton.setAttribute("aria-pressed", String(isHidden));
+                toggleButton.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
             });
         });
     })();
