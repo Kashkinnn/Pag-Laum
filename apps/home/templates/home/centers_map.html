@@ -13,16 +13,24 @@
 {% block main_content %}
 <section class="page-banner">
     <div>
+        <div class="relational-eyebrow">In-Person Psychiatric Care</div>
         <h1>Psychiatric Centers &amp; Mental Health Facilities Map</h1>
         <p>
             Browse hospitals and psychiatric centers with behavioral health emergency units.
-            Use your location to identify the nearest center or explore centers on OpenStreetMap.
+            Use your location to identify the nearest center or explore facilities on OpenStreetMap.
         </p>
     </div>
-    <div>
+    <div class="locator-cta-box">
         <button type="button" class="pacer-btn" id="btn-find-nearest">
-            Find Nearest Center to Me
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true" style="margin-right: 6px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+            </svg>
+            <span>Find Nearest Center to Me</span>
         </button>
+        <div class="location-privacy-note">
+            Your location is checked privately in your browser and never stored.
+        </div>
     </div>
 </section>
 
@@ -33,25 +41,33 @@
             type="button"
             class="filter-pill {% if forloop.first %}active{% endif %}"
             data-region="{{ region }}"
+            aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
         >
             {{ region }}
         </button>
         {% endfor %}
     </div>
 
-    <input
-        type="search"
-        id="center-search"
-        class="search-input-box"
-        placeholder="Search hospital, city, or service..."
-        aria-label="Search psychiatric centers"
-    >
+    <div class="search-box-wrapper">
+        <span class="search-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+        </span>
+        <input
+            type="search"
+            id="center-search"
+            class="search-input-box"
+            placeholder="Search hospital, city, or service..."
+            aria-label="Search psychiatric centers"
+        >
+    </div>
 </section>
 
 <section class="centers-layout">
     <div class="map-panel">
         <div id="centers-map" aria-label="OpenStreetMap of Psychiatric Centers"></div>
-        <div class="map-status-bar" id="map-status">
+        <div class="map-status-bar" id="map-status" aria-live="polite">
             Showing {{ centers|length }} psychiatric centers across the Philippines. Click "Find Nearest Center to Me" to locate the closest facility.
         </div>
     </div>
@@ -77,11 +93,20 @@
                 <h2>{{ center.name }}</h2>
             </div>
 
-            <p class="center-meta-line">
-                <strong>Address:</strong> {{ center.address }}<br>
-                <strong>Hours:</strong> {{ center.hours }}<br>
-                <strong>Phone:</strong> {{ center.phone }}
-            </p>
+            <dl class="center-detail-list">
+                <div class="center-detail-row">
+                    <dt>Address</dt>
+                    <dd>{{ center.address }}</dd>
+                </div>
+                <div class="center-detail-row">
+                    <dt>Hours</dt>
+                    <dd>{{ center.hours }}</dd>
+                </div>
+                <div class="center-detail-row">
+                    <dt>Phone</dt>
+                    <dd>{{ center.phone }}</dd>
+                </div>
+            </dl>
 
             <div class="service-tags">
                 {% for service in center.services %}
@@ -262,8 +287,12 @@
 
         regionButtons.forEach(function (btn) {
             btn.addEventListener("click", function () {
-                regionButtons.forEach(function (b) { b.classList.remove("active"); });
+                regionButtons.forEach(function (b) {
+                    b.classList.remove("active");
+                    b.setAttribute("aria-pressed", "false");
+                });
                 btn.classList.add("active");
+                btn.setAttribute("aria-pressed", "true");
                 activeRegion = btn.getAttribute("data-region");
                 applyFilters();
             });

@@ -1265,80 +1265,133 @@ html[data-contrast="high"] .app-header {
 }
 
 /* Psychiatric Centers Map */
+.locator-cta-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 7px;
+}
+
+.location-privacy-note {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    background: var(--primary-soft);
+    border: 1px solid var(--border-subtle);
+    padding: 5px 10px;
+    border-radius: 999px;
+}
+
 .centers-layout {
     display: grid;
-    grid-template-columns: 1.15fr 0.85fr;
+    grid-template-columns: 1.12fr 0.88fr;
     gap: 20px;
     align-items: start;
 }
 
 .map-panel {
-    background: #ffffff;
-    border: 1px solid #e1ebe7;
-    border-radius: 14px;
+    background: var(--surface);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 6px 18px rgba(31, 69, 58, 0.05);
+    box-shadow: var(--shadow-soft);
 }
 
 #centers-map {
     width: 100%;
-    height: 540px;
+    height: 550px;
     background: #e9f1ee;
 }
 
 .map-status-bar {
-    padding: 12px 16px;
-    background: #f8fbfa;
-    border-top: 1px solid #e1ebe7;
-    font-size: 13.5px;
+    padding: 13px 16px;
+    background: var(--primary-soft);
+    border-top: 1px solid var(--border-subtle);
+    font-size: 0.85rem;
     color: var(--text-muted);
+    font-weight: 500;
 }
 
 .centers-list {
     display: flex;
     flex-direction: column;
     gap: 14px;
-    max-height: 590px;
+    max-height: 605px;
     overflow-y: auto;
     padding-right: 4px;
 }
 
 .center-card {
-    background: #ffffff;
-    border: 1.5px solid #e1ebe7;
-    border-radius: 14px;
-    padding: 18px;
+    background: var(--surface);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
+    box-shadow: var(--shadow-soft);
+    transition: border-color 0.15s ease;
+}
+
+.center-card:hover {
+    border-color: var(--primary);
 }
 
 .center-card.is-nearest {
     border-color: var(--primary);
-    background: #f4faf7;
+    background: var(--primary-light);
 }
 
 .nearest-badge {
     display: inline-block;
-    padding: 3px 10px;
+    padding: 4px 11px;
     border-radius: 999px;
     background: var(--primary);
     color: #ffffff;
-    font-size: 12px;
+    font-size: 0.76rem;
     font-weight: 700;
 }
 
 .center-card h2 {
     margin: 0;
-    font-size: 16.5px;
+    font-size: 1.08rem;
     color: var(--text-main);
+    line-height: 1.35;
+}
+
+.center-detail-list {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: var(--primary-soft);
+    border: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.center-detail-row {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 8px;
+    font-size: 0.84rem;
+    line-height: 1.45;
+}
+
+.center-detail-row dt {
+    font-weight: 700;
+    color: var(--primary-dark);
+}
+
+.center-detail-row dd {
+    margin: 0;
+    color: var(--text-muted);
 }
 
 .center-meta-line {
     margin: 0;
-    font-size: 13.5px;
+    font-size: 0.84rem;
     color: var(--text-muted);
-    line-height: 1.45;
+    line-height: 1.5;
 }
 
 .service-tags {
@@ -1348,39 +1401,54 @@ html[data-contrast="high"] .app-header {
 }
 
 .service-tag {
-    padding: 3px 9px;
+    padding: 4px 10px;
     border-radius: 999px;
-    background: #f1f5f4;
+    background: var(--primary-soft);
+    border: 1px solid var(--border-subtle);
     color: var(--text-main);
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 0.76rem;
+    font-weight: 600;
 }
 
 .center-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
 .center-action-btn {
     width: auto;
+    min-height: 40px;
     margin-top: 0;
-    padding: 7px 12px;
-    border-radius: 8px;
+    padding: 8px 14px;
+    border-radius: 10px;
     background: var(--primary);
     color: #ffffff;
     border: none;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 0.82rem;
+    font-weight: 700;
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.center-action-btn:hover {
+    background: var(--primary-dark);
 }
 
 .center-action-btn.outline {
-    background: #ffffff;
+    background: var(--surface);
     color: var(--primary-dark);
-    border: 1px solid #cbd9d3;
+    border: 1.5px solid var(--border-subtle);
+}
+
+.center-action-btn.outline:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
 }
 
 /* Relational JOIN & SUBQUERY Screens */
@@ -1608,5 +1676,9 @@ html[data-contrast="high"] .app-header {
 
     .hero-actions {
         width: 100%;
+    }
+
+    .locator-cta-box {
+        align-items: flex-start;
     }
 }
