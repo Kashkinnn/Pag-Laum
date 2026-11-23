@@ -1,43 +1,43 @@
 {% extends "home/home.html" %}
 
-{% block title %}Referral Network (SQL JOIN) - Pag-Laum{% endblock %}
+{% block title %}Referral Network - Pag-Laum{% endblock %}
 
 {% block main_content %}
 <section class="page-banner">
     <div>
-        <div class="relational-eyebrow">One-to-Many SQL INNER JOIN &bull; select_related("center")</div>
+        <div class="relational-eyebrow">Connected Care &amp; Hospital Pathways</div>
         <h1>Hotline-to-Hospital Referral Network</h1>
         <p>
-            Every crisis hotline row (child table <code>CrisisHotline</code>) is joined in a single SQL query
-            to its receiving hospital record (parent table <code>PsychiatricCenter</code>) via foreign key
-            <code>center_id</code>, helping you see both who to call and where in-person care connects.
+            Discover which receiving psychiatric hospital or medical center each 24/7 crisis hotline
+            coordinates with&mdash;so if a phone conversation turns into a need for in-person care,
+            you already know which facility is ready to receive you.
         </p>
     </div>
     <div class="static-disclaimer">
-        Showing <strong>{{ total_joined_count }}</strong> joined hotline referral{{ total_joined_count|pluralize }}
+        Showing <strong>{{ total_joined_count }}</strong> connected hotline referral{{ total_joined_count|pluralize }}
         across <strong>{{ distinct_centers_count }}</strong> receiving center{{ distinct_centers_count|pluralize }}
     </div>
 </section>
 
 <section class="relational-metrics-strip" aria-label="Referral network summary">
     <div class="relational-metric-card">
-        <span class="metric-label">Joined Hotline Referrals</span>
+        <span class="metric-label">Connected Crisis Lines</span>
         <strong class="metric-value">{{ total_joined_count }}</strong>
-        <span class="metric-sub">Active crisis lines with direct hospital routing</span>
+        <span class="metric-sub">Active hotlines with direct hospital coordination</span>
     </div>
     <div class="relational-metric-card">
         <span class="metric-label">Receiving Psychiatric Centers</span>
         <strong class="metric-value">{{ distinct_centers_count }}</strong>
-        <span class="metric-sub">Distinct partner facilities linked via <code>center_id</code></span>
+        <span class="metric-sub">Partner hospitals ready for in-person evaluation</span>
     </div>
     <div class="relational-metric-card">
-        <span class="metric-label">Query Strategy</span>
-        <strong class="metric-value metric-value-sm">One-to-Many SQL INNER JOIN</strong>
-        <span class="metric-sub">Django ORM <code>select_related("center")</code></span>
+        <span class="metric-label">Care Continuity</span>
+        <strong class="metric-value metric-value-sm">24/7 Phone-to-Hospital</strong>
+        <span class="metric-sub">Guided transition from phone support to clinical care</span>
     </div>
 </section>
 
-<section class="filter-toolbar" aria-label="Filter joined referral rows by region">
+<section class="filter-toolbar" aria-label="Filter referral pathways by region">
     <div class="filter-pills" role="group" aria-label="Filter by hotline region">
         {% for region in regions %}
         <a
@@ -49,26 +49,26 @@
         {% endfor %}
     </div>
     <a href="{{ dispatch_subquery_url }}" class="panel-more-link">
-        Switch to Dispatch Centers (Subquery) &rarr;
+        Switch to Dispatch Centers &rarr;
     </a>
 </section>
 
-<section class="panel-card relational-table-card" aria-label="Joined CrisisHotline and PsychiatricCenter records">
+<section class="panel-card relational-table-card" aria-label="Connected Crisis Hotlines and Receiving Psychiatric Centers">
     <div class="panel-header">
-        <h3>Joined Care Pathways: CrisisHotline &bowtie; PsychiatricCenter</h3>
-        <span class="badge-hours">INNER JOIN on center_id = id</span>
+        <h3>Connected Hotline &amp; Receiving Hospital Directory</h3>
+        <span class="badge-hours">Verified Care Pathways</span>
     </div>
 
     <div class="table-responsive">
         <table class="relational-table">
             <thead>
                 <tr>
-                    <th>Hotline PK &amp; Name <span class="th-sub">(CrisisHotline)</span></th>
-                    <th>Category &amp; Region <span class="th-sub">(CrisisHotline)</span></th>
-                    <th>Primary Line <span class="th-sub">(CrisisHotline)</span></th>
-                    <th>Care Pathway Link <span class="th-sub">(center_id &rarr; id)</span></th>
-                    <th>Receiving Psychiatric Center <span class="th-sub">(PsychiatricCenter)</span></th>
-                    <th>Facility Location &amp; Hours <span class="th-sub">(PsychiatricCenter)</span></th>
+                    <th>Crisis Hotline <span class="th-sub">First point of contact</span></th>
+                    <th>Focus &amp; Region <span class="th-sub">Coverage area</span></th>
+                    <th>Primary Line <span class="th-sub">Immediate phone support</span></th>
+                    <th>Care Pathway <span class="th-sub">Coordination status</span></th>
+                    <th>Receiving Psychiatric Center <span class="th-sub">Partner hospital</span></th>
+                    <th>Facility Location &amp; Hours <span class="th-sub">In-person care details</span></th>
                 </tr>
             </thead>
             <tbody>
@@ -76,7 +76,7 @@
                 <tr>
                     <td>
                         <div class="cell-primary">{{ hotline.name }}</div>
-                        <div class="cell-meta">PK #{{ hotline.id }} &bull; <code>{{ hotline.slug }}</code></div>
+                        <div class="cell-meta">{{ hotline.availability }}</div>
                     </td>
                     <td>
                         <span class="badge-region">{{ hotline.region }}</span>
@@ -85,20 +85,18 @@
                     <td>
                         {% if hotline.numbers %}
                         <div class="cell-primary">{{ hotline.numbers.0.phone }}</div>
-                        <div class="cell-meta">{{ hotline.availability }}</div>
+                        <div class="cell-meta">{{ hotline.numbers.0.label }}</div>
                         <a href="tel:{{ hotline.numbers.0.dial }}" class="table-call-link">Call Hotline</a>
                         {% else %}
                         <span class="cell-meta">{{ hotline.availability }}</span>
                         {% endif %}
                     </td>
                     <td>
-                        <span class="fk-pill">FK {{ hotline.center_id }} &rarr; PK {{ hotline.center.id }}</span>
+                        <span class="fk-pill">Direct Hospital Referral</span>
                     </td>
                     <td>
                         <div class="cell-primary">{{ hotline.center.name }}</div>
-                        <div class="cell-meta">
-                            Tel: {{ hotline.center.phone }} &bull; <code>{{ hotline.center.slug }}</code>
-                        </div>
+                        <div class="cell-meta">Tel: {{ hotline.center.phone }}</div>
                         <a href="tel:{{ hotline.center.dial }}" class="table-call-link">Call Receiving Center</a>
                     </td>
                     <td>
@@ -109,23 +107,11 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="empty-table-cell">No joined referral records matched this region filter.</td>
+                    <td colspan="6" class="empty-table-cell">No referral pathways matched this region filter.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-</section>
-
-<section class="panel-card sql-proof-card" aria-label="Django ORM and generated SQL verification">
-    <div class="panel-header">
-        <h3>ORM &amp; Compiled SQL Verification</h3>
-        <span class="badge-region">apps/home/views.py &rarr; build_referral_join_queryset()</span>
-    </div>
-    <p class="hotline-desc" style="margin-bottom: 12px;">
-        Django ORM compiles <code>CrisisHotline.objects.select_related("center").filter(center__isnull=False)</code>
-        into a single SQL <code>INNER JOIN</code> without issuing extra queries per row:
-    </p>
-    <pre class="sql-code-block"><code>{{ generated_sql }}</code></pre>
 </section>
 {% endblock %}

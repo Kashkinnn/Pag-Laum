@@ -219,7 +219,8 @@ class RelationalDatabaseOperationsTests(TestCase):
         self.assertContains(response, "Tawag Paglaum")
         self.assertContains(response, "Vicente Sotto Memorial Medical Center")
         self.assertContains(response, "B. Rodriguez St")
-        self.assertContains(response, "INNER JOIN")
+        self.assertContains(response, "Direct Hospital Referral")
+        self.assertNotContains(response, "ORM &amp; Compiled SQL Verification")
 
         filtered_resp = self.client.get(self.referral_join_url, {"region": "Visayas / Cebu"})
         self.assertEqual(filtered_resp.status_code, 200)
