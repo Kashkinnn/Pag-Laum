@@ -212,6 +212,87 @@ html[data-contrast="high"] .auth-wrapper {
     line-height: 1.5;
 }
 
+.recovery-steps-pills {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.recovery-step-pill {
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--primary-soft);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.recovery-step-pill.is-active {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary-dark);
+    font-weight: 700;
+}
+
+.recovery-step-sep {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.recovery-calm-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    border-radius: 12px;
+    background: var(--accent-warm);
+    border: 1px solid var(--accent-warm-border);
+    color: var(--accent-warm-text);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.recovery-calm-note svg {
+    width: 19px;
+    height: 19px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.alert-success {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-left: 4px solid #059669;
+    color: #065f46;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-size: 0.92rem;
+    line-height: 1.55;
+}
+
+.alert-success-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 1rem;
+}
+
+.alert-success-title svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.alert-success p {
+    margin: 0;
+}
+
 .alert-error {
     background: var(--danger-bg);
     border-left: 4px solid var(--danger);
