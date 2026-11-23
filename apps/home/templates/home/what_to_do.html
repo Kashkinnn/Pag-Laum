@@ -5,30 +5,33 @@
 {% block main_content %}
 <section class="page-banner">
     <div>
+        <div class="relational-eyebrow">Immediate Calm &amp; Grounding</div>
         <h1>What To Do During an Episode</h1>
         <p>
-            Practical, step-by-step grounding guides and calming exercises to help lessen panic,
-            overwhelming thoughts, or heavy emotional episodes—for yourself or someone you care about.
+            Practical, step-by-step grounding guides and calming exercises to help soften panic,
+            overwhelming thoughts, or heavy emotional waves&mdash;for yourself or someone you care about.
         </p>
     </div>
     <div class="static-disclaimer">
-        Step-by-step non-AI grounding guides curated for immediate episode management
+        Step-by-step non-AI grounding guides curated for immediate episode support
     </div>
 </section>
 
 <section class="tools-grid" aria-label="Interactive grounding exercises">
     <div class="panel-card">
         <div class="panel-header">
-            <h3>4–4–4–4 Box Breathing Pacer</h3>
+            <h3>4-4-4-4 Box Breathing Pacer</h3>
             <span class="badge-hours">4s Rhythm</span>
         </div>
         <div class="pacer-box">
-            <div class="breathing-circle" id="breathing-circle">
-                <span class="pacer-phase" id="pacer-phase">Ready</span>
-                <span class="pacer-timer" id="pacer-timer">4s</span>
+            <div class="breathing-aura-stage" id="breathing-aura-stage">
+                <div class="breathing-circle" id="breathing-circle">
+                    <span class="pacer-phase" id="pacer-phase">Ready</span>
+                    <span class="pacer-timer" id="pacer-timer">4s</span>
+                </div>
             </div>
-            <p class="hotline-desc">
-                Follow the gentle circle: Inhale (4s), Hold (4s), Exhale (4s), Rest (4s).
+            <p class="pacer-instruction" id="pacer-instruction" aria-live="polite">
+                Press Start whenever you feel ready. Breathe gently at a pace that feels comfortable.
             </p>
             <div class="pacer-controls">
                 <button type="button" class="pacer-btn" id="pacer-toggle">Start Breathing</button>
@@ -39,32 +42,38 @@
 
     <div class="panel-card">
         <div class="panel-header">
-            <h3>5–4–3–2–1 Sensory Grounding Checklist</h3>
+            <h3>5-4-3-2-1 Sensory Grounding Checklist</h3>
             <span class="badge-region" id="grounding-progress">0 / 5 Done</span>
         </div>
+        <div class="checklist-progress-track" aria-hidden="true">
+            <div class="checklist-progress-fill" id="grounding-progress-bar" style="width: 0%;"></div>
+        </div>
         <div class="checklist-items" id="grounding-checklist">
-            <button type="button" class="checklist-item" data-step="5">
+            <button type="button" class="checklist-item" data-step="5" aria-pressed="false">
                 <span><strong>5</strong> things you can see around you</span>
                 <span class="check-state">Tap</span>
             </button>
-            <button type="button" class="checklist-item" data-step="4">
+            <button type="button" class="checklist-item" data-step="4" aria-pressed="false">
                 <span><strong>4</strong> things you can physically touch</span>
                 <span class="check-state">Tap</span>
             </button>
-            <button type="button" class="checklist-item" data-step="3">
+            <button type="button" class="checklist-item" data-step="3" aria-pressed="false">
                 <span><strong>3</strong> sounds you can hear right now</span>
                 <span class="check-state">Tap</span>
             </button>
-            <button type="button" class="checklist-item" data-step="2">
+            <button type="button" class="checklist-item" data-step="2" aria-pressed="false">
                 <span><strong>2</strong> scents you can notice nearby</span>
                 <span class="check-state">Tap</span>
             </button>
-            <button type="button" class="checklist-item" data-step="1">
+            <button type="button" class="checklist-item" data-step="1" aria-pressed="false">
                 <span><strong>1</strong> steady truth you appreciate right now</span>
                 <span class="check-state">Tap</span>
             </button>
         </div>
-        <div style="margin-top: 12px;">
+        <div class="checklist-complete-note" id="checklist-complete-note" role="status" style="display: none;">
+            Well done. You stayed present through all 5 grounding steps. Take one more gentle breath.
+        </div>
+        <div class="checklist-footer-actions">
             <button type="button" class="pacer-btn secondary" id="checklist-reset">Reset Checklist</button>
         </div>
     </div>
@@ -77,6 +86,7 @@
             type="button"
             class="filter-pill {% if forloop.first %}active{% endif %}"
             data-category="{{ category }}"
+            aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
         >
             {{ category }}
         </button>
@@ -111,6 +121,11 @@
         <div class="guide-reassurance">
             {{ guide.reassurance }}
         </div>
+
+        <div class="guide-talk-helper">
+            <span>Need to talk to someone while doing this?</span>
+            <a href="tel:1553">Call 1553 (Free 24/7)</a>
+        </div>
     </article>
     {% endfor %}
 </section>
@@ -121,14 +136,16 @@
     (function () {
         // 4-4-4-4 Box Breathing Pacer
         const phases = [
-            { label: "Inhale", cls: "is-inhale" },
-            { label: "Hold", cls: "is-hold" },
-            { label: "Exhale", cls: "is-exhale" },
-            { label: "Rest", cls: "is-rest" },
+            { label: "Inhale", cls: "is-inhale", prompt: "Breathe in gently through your nose..." },
+            { label: "Hold", cls: "is-hold", prompt: "Hold softly without straining your shoulders..." },
+            { label: "Exhale", cls: "is-exhale", prompt: "Let your breath out slowly through your mouth..." },
+            { label: "Rest", cls: "is-rest", prompt: "Pause quietly and let your body settle..." },
         ];
+        const stage = document.getElementById("breathing-aura-stage");
         const circle = document.getElementById("breathing-circle");
         const phaseEl = document.getElementById("pacer-phase");
         const timerEl = document.getElementById("pacer-timer");
+        const instructionEl = document.getElementById("pacer-instruction");
         const toggleBtn = document.getElementById("pacer-toggle");
         const resetBtn = document.getElementById("pacer-reset");
 
@@ -139,14 +156,20 @@
         function renderPacer() {
             if (!circle || !phaseEl || !timerEl) return;
             circle.classList.remove("is-inhale", "is-hold", "is-exhale", "is-rest");
+            if (stage) stage.classList.remove("is-inhale", "is-hold", "is-exhale", "is-rest");
             if (intervalId !== null) {
                 const current = phases[phaseIndex];
                 circle.classList.add(current.cls);
+                if (stage) stage.classList.add(current.cls);
                 phaseEl.textContent = current.label;
                 timerEl.textContent = secondsLeft + "s";
+                if (instructionEl) instructionEl.textContent = current.prompt;
             } else {
                 phaseEl.textContent = "Ready";
                 timerEl.textContent = "4s";
+                if (instructionEl) {
+                    instructionEl.textContent = "Press Start whenever you feel ready. Breathe gently at a pace that feels comfortable.";
+                }
             }
         }
 
@@ -163,6 +186,7 @@
                 if (intervalId !== null) {
                     stopPacer();
                     phaseEl.textContent = "Paused";
+                    if (instructionEl) instructionEl.textContent = "Paused. Take all the time you need before resuming.";
                     return;
                 }
                 toggleBtn.textContent = "Pause";
@@ -190,18 +214,28 @@
         // 5-4-3-2-1 Checklist
         const checklistItems = document.querySelectorAll("#grounding-checklist .checklist-item");
         const progressEl = document.getElementById("grounding-progress");
+        const progressBar = document.getElementById("grounding-progress-bar");
+        const completeNote = document.getElementById("checklist-complete-note");
         const checklistReset = document.getElementById("checklist-reset");
 
         function updateChecklistProgress() {
+            const total = checklistItems.length || 5;
             const doneCount = document.querySelectorAll("#grounding-checklist .checklist-item.is-done").length;
             if (progressEl) {
-                progressEl.textContent = doneCount + " / 5 Done";
+                progressEl.textContent = doneCount + " / " + total + " Done";
+            }
+            if (progressBar) {
+                progressBar.style.width = Math.round((doneCount / total) * 100) + "%";
+            }
+            if (completeNote) {
+                completeNote.style.display = doneCount === total ? "block" : "none";
             }
         }
 
         checklistItems.forEach(function (item) {
             item.addEventListener("click", function () {
                 const isDone = item.classList.toggle("is-done");
+                item.setAttribute("aria-pressed", String(isDone));
                 const stateSpan = item.querySelector(".check-state");
                 if (stateSpan) stateSpan.textContent = isDone ? "Done" : "Tap";
                 updateChecklistProgress();
@@ -212,6 +246,7 @@
             checklistReset.addEventListener("click", function () {
                 checklistItems.forEach(function (item) {
                     item.classList.remove("is-done");
+                    item.setAttribute("aria-pressed", "false");
                     const stateSpan = item.querySelector(".check-state");
                     if (stateSpan) stateSpan.textContent = "Tap";
                 });
@@ -225,8 +260,12 @@
 
         categoryPills.forEach(function (pill) {
             pill.addEventListener("click", function () {
-                categoryPills.forEach(function (p) { p.classList.remove("active"); });
+                categoryPills.forEach(function (p) {
+                    p.classList.remove("active");
+                    p.setAttribute("aria-pressed", "false");
+                });
                 pill.classList.add("active");
+                pill.setAttribute("aria-pressed", "true");
                 const chosen = pill.getAttribute("data-category");
                 guideCards.forEach(function (card) {
                     const cat = card.getAttribute("data-category");
