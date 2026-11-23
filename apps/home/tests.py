@@ -261,3 +261,4 @@ class RelationalDatabaseOperationsTests(TestCase):
         self.assertEqual(resp_walkin.context["matched_centers_count"], 3)
         self.assertContains(resp_walkin, "Chong Hua Hospital")
         self.assertContains(resp_walkin, "Western Visayas Medical Center")
+        self.assertNotContains(resp_all, "Inner Query vs. Outer Query SQL Verification")
