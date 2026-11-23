@@ -81,12 +81,12 @@ html[data-contrast="high"] .app-header {
 .nav-link {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     min-height: 40px;
-    padding: 7px 11px;
+    padding: 7px 9px;
     border-radius: 10px;
     text-decoration: none;
-    font-size: 0.84rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     color: var(--text-muted);
     transition: background-color 0.15s ease, color 0.15s ease;
@@ -507,7 +507,8 @@ html[data-contrast="high"] .app-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: 10px 12px;
     margin-bottom: 16px;
 }
 
@@ -646,6 +647,10 @@ html[data-contrast="high"] .app-header {
     box-shadow: var(--shadow-soft);
 }
 
+.page-banner > div:first-child {
+    flex: 1 1 460px;
+}
+
 .page-banner h1 {
     margin: 0 0 6px;
     text-align: left;
@@ -733,6 +738,7 @@ html[data-contrast="high"] .app-header {
 
 .filter-pill {
     width: auto;
+    max-width: 100%;
     min-height: 40px;
     margin-top: 0;
     padding: 8px 15px;
@@ -742,6 +748,8 @@ html[data-contrast="high"] .app-header {
     border: 1.5px solid var(--border-subtle);
     font-size: 0.85rem;
     font-weight: 600;
+    line-height: 1.35;
+    text-align: center;
     cursor: pointer;
     transition: all 0.15s ease;
 }
@@ -1545,7 +1553,6 @@ html[data-contrast="high"] .app-header {
     border-bottom: 2px solid var(--border-subtle);
     font-weight: 700;
     vertical-align: top;
-    white-space: nowrap;
 }
 
 .th-sub {
@@ -1612,6 +1619,7 @@ html[data-contrast="high"] .app-header {
     font-weight: 700;
     color: var(--primary-dark);
     text-decoration: none;
+    white-space: nowrap;
     transition: background-color 0.15s ease, color 0.15s ease;
 }
 
@@ -1698,7 +1706,7 @@ html[data-contrast="high"] .app-header {
     }
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1180px) {
     .nav-mobile-toggle {
         display: inline-flex;
         align-items: center;
