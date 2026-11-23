@@ -75,6 +75,12 @@
                     </svg>
                     <span>Dispatch Centers</span>
                 </a>
+                <a href="{{ journaling_url }}" class="nav-link {% if active_page == 'journaling' %}active{% endif %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zM19.5 7.125L16.862 4.487M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                    </svg>
+                    <span>Journaling</span>
+                </a>
             </nav>
 
             <div class="nav-user">
@@ -254,8 +260,27 @@
             </div>
         </section>
 
-        <h2 class="section-heading relational-section-heading">Connected Care &amp; Hospital Pathways</h2>
-        <section class="relational-grid" aria-label="Pag-Laum connected care modules">
+        <h2 class="section-heading relational-section-heading">Personal Wellness &amp; Connected Care</h2>
+        <section class="feature-grid" aria-label="Pag-Laum personal journaling and connected care modules">
+            <article class="feature-card">
+                <div>
+                    <div class="feature-card-top">
+                        <span class="feature-icon-box" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zM19.5 7.125L16.862 4.487M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                            </svg>
+                        </span>
+                        <span class="feature-count">Private Space</span>
+                    </div>
+                    <h2>Journaling</h2>
+                    <p>
+                        Keep a personal day-to-day journal, schedule care sessions on your calendar,
+                        track gentle reminders, and save comforting notes.
+                    </p>
+                </div>
+                <a href="{{ journaling_url }}" class="feature-card-link">Open Journaling &rarr;</a>
+            </article>
+
             <article class="feature-card">
                 <div>
                     <div class="feature-card-top">
