@@ -8,7 +8,15 @@ from django.urls import reverse
 
 from pag_laum.supabase_client import build_rest_url, fetch_table
 
-from .models import CrisisHotline, EpisodeGuide, PsychiatricCenter
+from .models import (
+    CrisisHotline,
+    EpisodeGuide,
+    JournalEntry,
+    PsychiatricCenter,
+    ScheduleEvent,
+    WellnessNote,
+    WellnessReminder,
+)
 from .views import (
     build_dispatch_subquery_queryset,
     build_referral_join_queryset,
@@ -30,6 +38,7 @@ class HomeScreensTests(TestCase):
         self.centers_map_url = reverse("centers_map")
         self.referral_join_url = reverse("referral_network_join")
         self.dispatch_subquery_url = reverse("dispatch_centers_subquery")
+        self.journaling_url = reverse("journaling")
         self.protected_urls = [
             self.home_url,
             self.hotlines_url,
@@ -37,6 +46,7 @@ class HomeScreensTests(TestCase):
             self.centers_map_url,
             self.referral_join_url,
             self.dispatch_subquery_url,
+            self.journaling_url,
         ]
         self.user = User.objects.create_user(
             username="dashboard_member",
@@ -262,3 +272,149 @@ class RelationalDatabaseOperationsTests(TestCase):
         self.assertContains(resp_walkin, "Chong Hua Hospital")
         self.assertContains(resp_walkin, "Western Visayas Medical Center")
         self.assertNotContains(resp_all, "Inner Query vs. Outer Query SQL Verification")
+
+
+class JournalingScreenTests(TestCase):
+    """Tests for the Journaling screen (calendar schedules, daily journal, notes, and reminders)."""
+
+    def setUp(self):
+        self.journaling_url = reverse("journaling")
+        self.journaling_api_url = reverse("journaling_api")
+        self.guest_login_url = reverse("guest_login")
+        self.user = User.objects.create_user(
+            username="journal_member",
+            password="JournalPass123!",
+        )
+        self.other_user = User.objects.create_user(
+            username="other_member",
+            password="OtherPass123!",
+        )
+
+    def test_guest_user_gets_local_storage_journaling_mode_and_cannot_write_to_db(self):
+        self.client.get(self.guest_login_url)
+        resp = self.client.get(self.journaling_url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Journaling")
+        self.assertContains(resp, "Saved privately on this device only")
+        self.assertEqual(resp.context["storage_mode"], "local")
+
+        api_resp = self.client.post(
+            self.journaling_api_url,
+            data=json.dumps({"action": "create_note", "title": "Hi", "content": "Guest note"}),
+            content_type="application/json",
+        )
+        self.assertEqual(api_resp.status_code, 403)
+        self.assertEqual(WellnessNote.objects.count(), 0)
+
+    def test_authenticated_user_crud_for_schedules_journals_notes_and_reminders(self):
+        self.client.force_login(self.user)
+        page_resp = self.client.get(self.journaling_url)
+        self.assertEqual(page_resp.status_code, 200)
+        self.assertEqual(page_resp.context["storage_mode"], "account")
+        self.assertContains(page_resp, "Care &amp; Wellness Calendar")
+        self.assertContains(page_resp, "Personal Day-to-Day Journal")
+
+        # Schedule create + delete
+        sched_resp = self.client.post(
+            self.journaling_api_url,
+            data=json.dumps(
+                {
+                    "action": "create_schedule",
+                    "title": "Counseling Check-in",
+                    "event_date": "2026-11-24",
+                    "event_time": "14:00",
+                    "category": "Therapy",
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(sched_resp.status_code, 201)
+        sched_id = sched_resp.json()["item"]["id"]
+        self.assertEqual(ScheduleEvent.objects.filter(user=self.user).count(), 1)
+
+        # Journal create
+        journal_resp = self.client.post(
+            self.journaling_api_url,
+            data=json.dumps(
+                {
+                    "action": "create_journal",
+                    "entry_date": "2026-11-23",
+                    "title": "Quiet Evening",
+                    "mood": "Calm",
+                    "content": "Took a slow walk and felt lighter.",
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(journal_resp.status_code, 201)
+        journal_id = journal_resp.json()["item"]["id"]
+        self.assertEqual(JournalEntry.objects.filter(user=self.user).count(), 1)
+
+        # Note create
+        note_resp = self.client.post(
+            self.journaling_api_url,
+            data=json.dumps(
+                {
+                    "action": "create_note",
+                    "title": "Grounding Words",
+                    "tag": "Coping Idea",
+                    "content": "This wave will pass.",
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(note_resp.status_code, 201)
+        note_id = note_resp.json()["item"]["id"]
+        self.assertEqual(WellnessNote.objects.filter(user=self.user).count(), 1)
+
+        # Reminder create + toggle
+        rem_resp = self.client.post(
+            self.journaling_api_url,
+            data=json.dumps(
+                {
+                    "action": "create_reminder",
+                    "title": "Drink a glass of water",
+                    "due_date": "2026-11-23",
+                    "due_time": "18:00",
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(rem_resp.status_code, 201)
+        rem_id = rem_resp.json()["item"]["id"]
+        toggle_resp = self.client.post(
+            self.journaling_api_url,
+            data=json.dumps({"action": "toggle_reminder", "id": rem_id}),
+            content_type="application/json",
+        )
+        self.assertEqual(toggle_resp.status_code, 200)
+        self.assertTrue(toggle_resp.json()["item"]["is_completed"])
+
+        # User isolation: another user cannot delete this user's schedule
+        self.client.force_login(self.other_user)
+        forbidden_del = self.client.post(
+            self.journaling_api_url,
+            data=json.dumps({"action": "delete_schedule", "id": sched_id}),
+            content_type="application/json",
+        )
+        self.assertEqual(forbidden_del.status_code, 404)
+        self.assertEqual(ScheduleEvent.objects.filter(user=self.user).count(), 1)
+
+        # Owner deletes all 4 items cleanly
+        self.client.force_login(self.user)
+        for action, item_id in [
+            ("delete_schedule", sched_id),
+            ("delete_journal", journal_id),
+            ("delete_note", note_id),
+            ("delete_reminder", rem_id),
+        ]:
+            del_resp = self.client.post(
+                self.journaling_api_url,
+                data=json.dumps({"action": action, "id": item_id}),
+                content_type="application/json",
+            )
+            self.assertEqual(del_resp.status_code, 200)
+        self.assertEqual(ScheduleEvent.objects.count(), 0)
+        self.assertEqual(JournalEntry.objects.count(), 0)
+        self.assertEqual(WellnessNote.objects.count(), 0)
+        self.assertEqual(WellnessReminder.objects.count(), 0)

@@ -9,4 +9,6 @@ urlpatterns = [
     path("centers/", views.centers_map_view, name="centers_map"),
     path("referral-network/", views.referral_network_join_view, name="referral_network_join"),
     path("dispatch-centers/", views.dispatch_centers_subquery_view, name="dispatch_centers_subquery"),
+    path("journaling/", views.journaling_view, name="journaling"),
+    path("journaling/api/", views.journaling_api_view, name="journaling_api"),
 ]

@@ -1,9 +1,13 @@
+from datetime import date
 from functools import wraps
+import json
 
 from django.conf import settings
 from django.db.models import OuterRef, Subquery
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 
 from pag_laum.supabase_client import fetch_table, is_supabase_configured
 
@@ -13,7 +17,15 @@ from .data import (
     HOTLINE_CENTER_REFERRALS,
     PSYCHIATRIC_CENTERS,
 )
-from .models import CrisisHotline, EpisodeGuide, PsychiatricCenter
+from .models import (
+    CrisisHotline,
+    EpisodeGuide,
+    JournalEntry,
+    PsychiatricCenter,
+    ScheduleEvent,
+    WellnessNote,
+    WellnessReminder,
+)
 
 
 def ensure_relational_data_seeded() -> None:
@@ -123,6 +135,7 @@ def _base_context(request, active_page):
         "centers_url": reverse("centers_map"),
         "referral_join_url": reverse("referral_network_join"),
         "dispatch_subquery_url": reverse("dispatch_centers_subquery"),
+        "journaling_url": reverse("journaling"),
         "supabase_url": getattr(settings, "SUPABASE_URL", ""),
         "supabase_connected": is_supabase_configured(),
     }
@@ -341,3 +354,216 @@ def dispatch_centers_subquery_view(request):
         }
     )
     return render(request, "home/dispatch_subquery.html", context)
+
+
+def _parse_iso_date(raw_value: str | None) -> date | None:
+    """Parse an ISO YYYY-MM-DD date string safely."""
+    if not raw_value:
+        return None
+    try:
+        return date.fromisoformat(str(raw_value).strip())
+    except (ValueError, TypeError):
+        return None
+
+
+def _serialize_schedule(event: ScheduleEvent) -> dict:
+    return {
+        "id": str(event.id),
+        "title": event.title,
+        "event_date": event.event_date.isoformat(),
+        "event_time": event.event_time,
+        "category": event.category,
+        "notes": event.notes,
+    }
+
+
+def _serialize_journal(entry: JournalEntry) -> dict:
+    return {
+        "id": str(entry.id),
+        "entry_date": entry.entry_date.isoformat(),
+        "title": entry.title,
+        "mood": entry.mood,
+        "content": entry.content,
+    }
+
+
+def _serialize_note(note: WellnessNote) -> dict:
+    return {
+        "id": str(note.id),
+        "title": note.title,
+        "content": note.content,
+        "tag": note.tag,
+        "created_at": note.created_at.strftime("%b %d, %Y"),
+    }
+
+
+def _serialize_reminder(reminder: WellnessReminder) -> dict:
+    return {
+        "id": str(reminder.id),
+        "title": reminder.title,
+        "due_date": reminder.due_date.isoformat() if reminder.due_date else "",
+        "due_time": reminder.due_time,
+        "is_completed": reminder.is_completed,
+    }
+
+
+@login_or_guest_required
+def journaling_view(request):
+    """Personal Journaling workspace with calendar scheduling, daily journal, notes, and reminders."""
+    context = _base_context(request, "journaling")
+
+    if request.user.is_authenticated:
+        initial_data = {
+            "schedules": [
+                _serialize_schedule(ev)
+                for ev in ScheduleEvent.objects.filter(user=request.user)
+            ],
+            "journals": [
+                _serialize_journal(entry)
+                for entry in JournalEntry.objects.filter(user=request.user)
+            ],
+            "notes": [
+                _serialize_note(note)
+                for note in WellnessNote.objects.filter(user=request.user)
+            ],
+            "reminders": [
+                _serialize_reminder(rem)
+                for rem in WellnessReminder.objects.filter(user=request.user)
+            ],
+        }
+        storage_mode = "account"
+    else:
+        initial_data = {
+            "schedules": [],
+            "journals": [],
+            "notes": [],
+            "reminders": [],
+        }
+        storage_mode = "local"
+
+    context.update(
+        {
+            "storage_mode": storage_mode,
+            "journaling_api_url": reverse("journaling_api"),
+            "initial_journal_data": initial_data,
+            "today_iso": date.today().isoformat(),
+        }
+    )
+    return render(request, "home/journaling.html", context)
+
+
+@login_or_guest_required
+@require_POST
+def journaling_api_view(request):
+    """JSON persistence endpoint for authenticated users' journaling items."""
+    if not request.user.is_authenticated:
+        return JsonResponse(
+            {"error": "Guest entries are stored privately on your device."},
+            status=403,
+        )
+
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError):
+        return JsonResponse({"error": "Invalid JSON payload."}, status=400)
+
+    action = (payload.get("action") or "").strip()
+
+    if action == "create_schedule":
+        title = (payload.get("title") or "").strip()
+        event_date = _parse_iso_date(payload.get("event_date"))
+        if not title or not event_date:
+            return JsonResponse({"error": "Title and valid date are required."}, status=400)
+        event = ScheduleEvent.objects.create(
+            user=request.user,
+            title=title[:200],
+            event_date=event_date,
+            event_time=(payload.get("event_time") or "").strip()[:20],
+            category=(payload.get("category") or "Self-Care").strip()[:60] or "Self-Care",
+            notes=(payload.get("notes") or "").strip(),
+        )
+        return JsonResponse({"item": _serialize_schedule(event)}, status=201)
+
+    if action == "delete_schedule":
+        deleted, _ = ScheduleEvent.objects.filter(
+            id=payload.get("id"), user=request.user
+        ).delete()
+        if not deleted:
+            return JsonResponse({"error": "Schedule item not found."}, status=404)
+        return JsonResponse({"deleted": True})
+
+    if action == "create_journal":
+        title = (payload.get("title") or "").strip()
+        content = (payload.get("content") or "").strip()
+        entry_date = _parse_iso_date(payload.get("entry_date")) or date.today()
+        if not title or not content:
+            return JsonResponse({"error": "Title and journal entry text are required."}, status=400)
+        entry = JournalEntry.objects.create(
+            user=request.user,
+            entry_date=entry_date,
+            title=title[:200],
+            mood=(payload.get("mood") or "Calm").strip()[:40] or "Calm",
+            content=content,
+        )
+        return JsonResponse({"item": _serialize_journal(entry)}, status=201)
+
+    if action == "delete_journal":
+        deleted, _ = JournalEntry.objects.filter(
+            id=payload.get("id"), user=request.user
+        ).delete()
+        if not deleted:
+            return JsonResponse({"error": "Journal entry not found."}, status=404)
+        return JsonResponse({"deleted": True})
+
+    if action == "create_note":
+        title = (payload.get("title") or "").strip()
+        content = (payload.get("content") or "").strip()
+        if not title or not content:
+            return JsonResponse({"error": "Note title and content are required."}, status=400)
+        note = WellnessNote.objects.create(
+            user=request.user,
+            title=title[:160],
+            content=content,
+            tag=(payload.get("tag") or "Reflection").strip()[:60] or "Reflection",
+        )
+        return JsonResponse({"item": _serialize_note(note)}, status=201)
+
+    if action == "delete_note":
+        deleted, _ = WellnessNote.objects.filter(
+            id=payload.get("id"), user=request.user
+        ).delete()
+        if not deleted:
+            return JsonResponse({"error": "Note not found."}, status=404)
+        return JsonResponse({"deleted": True})
+
+    if action == "create_reminder":
+        title = (payload.get("title") or "").strip()
+        if not title:
+            return JsonResponse({"error": "Reminder text is required."}, status=400)
+        reminder = WellnessReminder.objects.create(
+            user=request.user,
+            title=title[:200],
+            due_date=_parse_iso_date(payload.get("due_date")),
+            due_time=(payload.get("due_time") or "").strip()[:20],
+        )
+        return JsonResponse({"item": _serialize_reminder(reminder)}, status=201)
+
+    if action == "toggle_reminder":
+        reminder = WellnessReminder.objects.filter(
+            id=payload.get("id"), user=request.user
+        ).first()
+        if reminder is None:
+            return JsonResponse({"error": "Reminder not found."}, status=404)
+        reminder.is_completed = not reminder.is_completed
+        reminder.save(update_fields=["is_completed"])
+        return JsonResponse({"item": _serialize_reminder(reminder)})
+
+    if action == "delete_reminder":
+        deleted, _ = WellnessReminder.objects.filter(
+            id=payload.get("id"), user=request.user
+        ).delete()
+        if not deleted:
+            return JsonResponse({"error": "Reminder not found."}, status=404)
+        return JsonResponse({"deleted": True})
+
+    return JsonResponse({"error": "Unsupported journaling action."}, status=400)

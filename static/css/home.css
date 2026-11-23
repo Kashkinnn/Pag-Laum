@@ -1660,6 +1660,509 @@ html[data-contrast="high"] .app-header {
     word-break: break-word;
 }
 
+/* Journaling Workspace — Calendar, Daily Journal, Reminders & Notes */
+.journal-status-toast {
+    margin-bottom: 18px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: var(--primary-light);
+    border: 1.5px solid var(--primary);
+    color: var(--primary-dark);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.journaling-workspace {
+    display: grid;
+    grid-template-columns: 1.25fr 0.85fr;
+    gap: 22px;
+    align-items: start;
+}
+
+.journaling-main-col,
+.journaling-side-col {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.calendar-nav-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cal-nav-btn {
+    width: auto;
+    min-height: 36px;
+    margin-top: 0;
+    padding: 6px 12px;
+    border-radius: 9px;
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+    border: 1px solid var(--border-subtle);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.cal-nav-btn:hover,
+.cal-nav-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+}
+
+.calendar-month-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.calendar-month-bar strong {
+    font-size: 1.05rem;
+    color: var(--primary-dark);
+}
+
+.calendar-legend {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.calendar-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.legend-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+.dot-schedule {
+    background: var(--primary);
+}
+
+.dot-journal {
+    background: #d97706;
+}
+
+.calendar-weekdays,
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+
+.calendar-weekdays {
+    margin-bottom: 6px;
+    text-align: center;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.calendar-day {
+    width: 100%;
+    min-height: 46px;
+    margin-top: 0;
+    padding: 6px 4px;
+    border-radius: 10px;
+    background: var(--primary-soft);
+    color: var(--text-main);
+    border: 1.5px solid transparent;
+    font-size: 0.86rem;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.calendar-day:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+}
+
+.calendar-day.is-today {
+    border-color: var(--primary);
+    background: var(--accent-warm);
+    color: var(--accent-warm-text);
+}
+
+.calendar-day.is-selected {
+    background: var(--primary);
+    border-color: var(--primary-dark);
+    color: #ffffff;
+}
+
+.calendar-day.is-selected .dot-schedule {
+    background: #ffffff;
+}
+
+.calendar-day.is-selected .dot-journal {
+    background: #fde68a;
+}
+
+.calendar-day.is-empty {
+    background: transparent;
+    border: none;
+    cursor: default;
+}
+
+.day-dots {
+    display: inline-flex;
+    gap: 3px;
+    min-height: 7px;
+}
+
+.selected-day-section {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.selected-day-header,
+.journal-history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.selected-day-header h4,
+.journal-history-header h4 {
+    margin: 0;
+    font-size: 0.96rem;
+    color: var(--primary-dark);
+}
+
+.journal-history-header {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.journal-view-toggle {
+    display: flex;
+    gap: 6px;
+}
+
+.schedule-list,
+.journal-entries-list,
+.reminders-list,
+.notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.reminders-list,
+.notes-list {
+    margin-top: 16px;
+}
+
+.journal-empty-hint {
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: var(--primary-soft);
+    border: 1px dashed var(--border-subtle);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.schedule-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--primary-soft);
+    border: 1px solid var(--border-subtle);
+}
+
+.schedule-item-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.schedule-time-pill {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.schedule-item-info strong {
+    font-size: 0.92rem;
+    color: var(--text-main);
+}
+
+.journal-inline-form {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.journal-form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.journal-form-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+
+.journal-field-label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.journal-input,
+.journal-textarea {
+    width: 100%;
+    min-height: 42px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border-subtle);
+    background: #fbfdfc;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+.journal-textarea {
+    min-height: 88px;
+    resize: vertical;
+    line-height: 1.55;
+}
+
+.journal-input:focus,
+.journal-textarea:focus {
+    outline: none;
+    background: var(--surface);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(35, 92, 75, 0.16);
+}
+
+.journal-prompt-bar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 16px;
+    border-radius: 14px;
+    background: var(--accent-warm);
+    border: 1px solid var(--accent-warm-border);
+    margin-bottom: 14px;
+}
+
+.prompt-eyebrow {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--accent-warm-text);
+    margin-bottom: 3px;
+}
+
+.journal-prompt-bar p {
+    margin: 0;
+    font-size: 0.87rem;
+    color: var(--text-main);
+    line-height: 1.5;
+}
+
+.mood-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 4px;
+}
+
+.mood-pill {
+    width: auto;
+    min-height: 36px;
+    margin-top: 0;
+    padding: 6px 13px;
+    border-radius: 999px;
+    background: var(--primary-soft);
+    color: var(--text-muted);
+    border: 1.5px solid var(--border-subtle);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.mood-pill:hover,
+.mood-pill.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+}
+
+.journal-entry-card,
+.note-card {
+    padding: 15px 16px;
+    border-radius: 14px;
+    background: var(--primary-soft);
+    border: 1px solid var(--border-subtle);
+}
+
+.note-card {
+    background: var(--accent-warm);
+    border-color: var(--accent-warm-border);
+}
+
+.journal-entry-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.journal-entry-badges {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.journal-entry-card h5,
+.note-card h5 {
+    margin: 0 0 6px;
+    font-size: 0.96rem;
+    color: var(--text-main);
+}
+
+.journal-entry-card p,
+.note-card p {
+    margin: 0;
+    font-size: 0.87rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+}
+
+.reminder-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: var(--primary-soft);
+    border: 1.5px solid var(--border-subtle);
+}
+
+.reminder-row.is-done {
+    background: var(--primary-light);
+    border-color: var(--primary);
+}
+
+.reminder-toggle-btn {
+    flex: 1;
+    width: auto;
+    margin-top: 0;
+    padding: 2px;
+    background: transparent;
+    color: var(--text-main);
+    border: none;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.reminder-check-box {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 2px solid var(--primary);
+    background: var(--surface);
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.reminder-row.is-done .reminder-check-box {
+    background: var(--primary);
+}
+
+.reminder-text-wrap strong {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    line-height: 1.4;
+}
+
+.reminder-row.is-done .reminder-text-wrap strong {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.reminder-text-wrap small {
+    display: block;
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.item-delete-btn {
+    width: auto;
+    min-height: 32px;
+    margin-top: 0;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text-muted);
+    border: 1px solid var(--border-subtle);
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.item-delete-btn:hover {
+    background: var(--danger-bg);
+    border-color: #fca5a5;
+    color: var(--danger);
+}
+
 /* Footer */
 .app-footer {
     text-align: center;
@@ -1693,7 +2196,8 @@ html[data-contrast="high"] .app-header {
     .hotlines-grid,
     .tools-grid,
     .guides-list,
-    .centers-layout {
+    .centers-layout,
+    .journaling-workspace {
         grid-template-columns: 1fr;
     }
 
@@ -1748,5 +2252,10 @@ html[data-contrast="high"] .app-header {
 
     .locator-cta-box {
         align-items: flex-start;
+    }
+
+    .journal-form-grid-2,
+    .journal-form-grid-3 {
+        grid-template-columns: 1fr;
     }
 }
