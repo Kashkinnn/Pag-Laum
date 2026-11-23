@@ -5,85 +5,379 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>{% block title %}Pag-Laum{% endblock %}</title>
+    <script>
+        (function () {
+            try {
+                if (localStorage.getItem("paglaum_font_scale") === "large") {
+                    document.documentElement.setAttribute("data-font-scale", "large");
+                }
+                if (localStorage.getItem("paglaum_contrast") === "high") {
+                    document.documentElement.setAttribute("data-contrast", "high");
+                }
+            } catch (err) {
+                /* Ignore storage errors in restricted privacy contexts */
+            }
+        })();
+    </script>
     <style>
         :root {
-            --primary: #2f6f5e;
-            --primary-dark: #235347;
-            --primary-light: #e8f3ef;
-            --bg: #f0f5f3;
-            --text-main: #1f2937;
-            --text-muted: #64748b;
-            --danger: #b00020;
-            --danger-bg: #fde8e8;
+            --primary: #235c4b;
+            --primary-dark: #173f33;
+            --primary-light: #e6f2ed;
+            --primary-soft: #f2f8f5;
+            --accent-warm: #fdf6e7;
+            --accent-warm-border: #f1dcb0;
+            --accent-warm-text: #784712;
+            --bg: #f4f8f6;
+            --surface: #ffffff;
+            --border-subtle: #d8e5df;
+            --text-main: #182621;
+            --text-muted: #4f635c;
+            --danger: #b42318;
+            --danger-bg: #fef3f2;
+            --urgent-coral: #c93b3b;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --shadow-soft: 0 10px 30px rgba(23, 63, 51, 0.07);
         }
+
+        html {
+            font-size: 100%;
+            scroll-behavior: smooth;
+        }
+
+        html[data-font-scale="large"] {
+            font-size: 112.5%;
+        }
+
+        html[data-contrast="high"] {
+            --primary: #0f3d2e;
+            --primary-dark: #07231a;
+            --primary-light: #d7ebe2;
+            --primary-soft: #e6f2ed;
+            --accent-warm: #fff3cc;
+            --accent-warm-border: #8a5a00;
+            --accent-warm-text: #4a2800;
+            --bg: #ffffff;
+            --surface: #ffffff;
+            --border-subtle: #182621;
+            --text-main: #000000;
+            --text-muted: #1f2937;
+            --danger: #990000;
+            --danger-bg: #ffe5e5;
+            --urgent-coral: #990000;
+        }
+
         * {
             box-sizing: border-box;
         }
+
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
             background-color: var(--bg);
             color: var(--text-main);
             margin: 0;
             padding: 0;
-            line-height: 1.5;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
         }
-        .container {
-            max-width: 400px;
-            margin: 80px auto;
+
+        html[data-font-scale="large"] body {
+            font-size: 1.0625rem;
+            line-height: 1.7;
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        /* Skip to Content Link */
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            top: 8px;
+            z-index: 1000;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            background: var(--primary-dark);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.9375rem;
+            text-decoration: none;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+        }
+
+        .skip-link:focus {
+            left: 12px;
+        }
+
+        /* Global 24/7 Crisis Lifeline & Accessibility Bar */
+        .crisis-lifeline-bar {
+            background: #14362b;
+            color: #f4faf7;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+            padding: 8px 20px;
+            font-size: 0.875rem;
+        }
+
+        html[data-contrast="high"] .crisis-lifeline-bar {
+            background: #000000;
+            color: #ffffff;
+            border-bottom: 2px solid #ffffff;
+        }
+
+        .lifeline-bar-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px 16px;
+        }
+
+        .lifeline-support-group {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px 10px;
+        }
+
+        .lifeline-pulse-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.22);
+            flex-shrink: 0;
+        }
+
+        .lifeline-prompt {
+            color: #e6f2ed;
+            font-weight: 500;
+        }
+
+        .lifeline-call-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 36px;
+            padding: 5px 13px;
+            border-radius: 999px;
             background: #ffffff;
-            padding: 32px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            color: #14362b;
+            font-weight: 700;
+            font-size: 0.84rem;
+            text-decoration: none;
+            transition: background-color 0.15s ease, transform 0.1s ease;
         }
+
+        .lifeline-call-pill:hover {
+            background: #e6f2ed;
+            transform: translateY(-1px);
+        }
+
+        .lifeline-call-pill.is-emergency {
+            background: var(--urgent-coral);
+            color: #ffffff;
+        }
+
+        .lifeline-call-pill.is-emergency:hover {
+            background: #a82c2c;
+        }
+
+        .lifeline-call-pill:focus-visible,
+        .a11y-toggle-btn:focus-visible {
+            outline: 3px solid #fde68a;
+            outline-offset: 2px;
+        }
+
+        .a11y-controls {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .a11y-toggle-btn {
+            width: auto;
+            margin-top: 0;
+            min-height: 36px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.34);
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+
+        .a11y-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .a11y-toggle-btn[aria-pressed="true"] {
+            background: #fdf6e7;
+            color: #173f33;
+            border-color: #fdf6e7;
+            font-weight: 700;
+        }
+
+        .container {
+            max-width: 440px;
+            margin: 64px auto;
+            background: var(--surface);
+            padding: 32px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+            box-shadow: var(--shadow-soft);
+        }
+
         h1 {
             text-align: center;
             color: var(--primary);
         }
+
         form p {
             margin: 12px 0;
         }
+
         label {
             display: block;
             margin-bottom: 4px;
-            font-weight: bold;
+            font-weight: 600;
         }
+
         input {
             width: 100%;
-            padding: 8px;
+            padding: 10px 12px;
             box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            border: 1.5px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
         }
+
         button, .btn {
             display: inline-block;
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin-top: 12px;
             background-color: var(--primary);
             color: #fff;
             border: none;
-            border-radius: 4px;
-            font-size: 16px;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
             cursor: pointer;
             text-align: center;
             text-decoration: none;
         }
+
         .link-row {
             text-align: center;
             margin-top: 16px;
         }
+
         .errorlist {
             color: var(--danger);
-            font-size: 14px;
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 640px) {
+            .crisis-lifeline-bar {
+                padding: 10px 14px;
+            }
+            .lifeline-bar-inner {
+                gap: 8px;
+            }
         }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div class="crisis-lifeline-bar" role="region" aria-label="Immediate 24/7 Crisis Lifeline and Accessibility">
+        <div class="lifeline-bar-inner">
+            <div class="lifeline-support-group">
+                <span class="lifeline-pulse-dot" aria-hidden="true"></span>
+                <span class="lifeline-prompt">Need someone to talk to right now? Free 24/7 crisis support:</span>
+                <a href="tel:1553" class="lifeline-call-pill">Call 1553 (NCMH)</a>
+                <a href="tel:911" class="lifeline-call-pill is-emergency">Call 911</a>
+            </div>
+            <div class="a11y-controls" role="group" aria-label="Display and accessibility settings">
+                <button type="button" class="a11y-toggle-btn" id="a11y-font-btn" aria-pressed="false">
+                    A+ Large Text
+                </button>
+                <button type="button" class="a11y-toggle-btn" id="a11y-contrast-btn" aria-pressed="false">
+                    High Contrast
+                </button>
+            </div>
+        </div>
+    </div>
+
     {% block page_wrapper %}
-    <div class="container">
+    <div id="main-content" class="container">
         {% block content %}{% endblock %}
     </div>
     {% endblock %}
+
+    <script>
+        (function () {
+            const root = document.documentElement;
+            const fontBtn = document.getElementById("a11y-font-btn");
+            const contrastBtn = document.getElementById("a11y-contrast-btn");
+
+            function syncButtonStates() {
+                if (fontBtn) {
+                    const isLarge = root.getAttribute("data-font-scale") === "large";
+                    fontBtn.setAttribute("aria-pressed", String(isLarge));
+                }
+                if (contrastBtn) {
+                    const isHigh = root.getAttribute("data-contrast") === "high";
+                    contrastBtn.setAttribute("aria-pressed", String(isHigh));
+                }
+            }
+
+            syncButtonStates();
+
+            if (fontBtn) {
+                fontBtn.addEventListener("click", function () {
+                    const nextLarge = root.getAttribute("data-font-scale") !== "large";
+                    if (nextLarge) {
+                        root.setAttribute("data-font-scale", "large");
+                    } else {
+                        root.removeAttribute("data-font-scale");
+                    }
+                    try {
+                        localStorage.setItem("paglaum_font_scale", nextLarge ? "large" : "default");
+                    } catch (err) {}
+                    syncButtonStates();
+                });
+            }
+
+            if (contrastBtn) {
+                contrastBtn.addEventListener("click", function () {
+                    const nextHigh = root.getAttribute("data-contrast") !== "high";
+                    if (nextHigh) {
+                        root.setAttribute("data-contrast", "high");
+                    } else {
+                        root.removeAttribute("data-contrast");
+                    }
+                    try {
+                        localStorage.setItem("paglaum_contrast", nextHigh ? "high" : "default");
+                    } catch (err) {}
+                    syncButtonStates();
+                });
+            }
+        })();
+    </script>
 </body>
 </html>

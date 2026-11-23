@@ -99,3 +99,13 @@ class LoginViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.home_url)
         self.assertTrue(self.client.session.get("is_guest"))
+
+    def test_base_shell_renders_crisis_lifeline_and_accessibility_controls(self):
+        for url in (self.login_url, self.forgot_password_url):
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, "Skip to main content")
+                self.assertContains(response, "tel:1553")
+                self.assertContains(response, "A+ Large Text")
+                self.assertContains(response, "High Contrast")
