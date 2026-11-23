@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -58,3 +59,88 @@ class PsychiatricCenter(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+
+class ScheduleEvent(models.Model):
+    """User-owned calendar scheduling event for appointments and self-care."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="schedule_events",
+    )
+    title = models.CharField(max_length=200)
+    event_date = models.DateField()
+    event_time = models.CharField(max_length=20, blank=True, default="")
+    category = models.CharField(max_length=60, default="Self-Care")
+    notes = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["event_date", "event_time", "id"]
+
+    def __str__(self) -> str:
+        return f"{self.event_date} - {self.title}"
+
+
+class JournalEntry(models.Model):
+    """User-owned personal day-to-day journal entry."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="journal_entries",
+    )
+    entry_date = models.DateField()
+    title = models.CharField(max_length=200)
+    mood = models.CharField(max_length=40, default="Calm")
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-entry_date", "-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.entry_date} - {self.title}"
+
+
+class WellnessNote(models.Model):
+    """User-owned quick personal note."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="wellness_notes",
+    )
+    title = models.CharField(max_length=160)
+    content = models.TextField()
+    tag = models.CharField(max_length=60, default="Reflection")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return self.title
+
+
+class WellnessReminder(models.Model):
+    """User-owned checkable personal wellness reminder."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="wellness_reminders",
+    )
+    title = models.CharField(max_length=200)
+    due_date = models.DateField(null=True, blank=True)
+    due_time = models.CharField(max_length=20, blank=True, default="")
+    is_completed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["is_completed", "due_date", "due_time", "-created_at"]
+
+    def __str__(self) -> str:
+        return self.title
